@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102844">
+<title>Village Typing Defenders</title>
+<style>
+  :root {
+    --navy:#102844; --deep:#0a1c32; --sky:#173d61; --mint:#7cf0ce;
+    --gold:#ffd166; --coral:#ff7b83; --ice:#e8fbff; --muted:#a8c3d9;
+    --panel:rgba(15,39,65,.92); --line:rgba(190,230,255,.18);
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; min-height:100%; background:var(--deep); color:#f6fbff; font-family: ui-rounded, "Trebuchet MS", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  body { min-height:100vh; overflow-x:hidden; background:radial-gradient(ellipse at 50% 0%, #234d72 0%, #102844 48%, #09172a 100%); }
+  button, input { font:inherit; }
+  button { cursor:pointer; }
+  button:focus-visible, input:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+  .app { width:min(1180px, 100%); margin:0 auto; padding:20px clamp(12px, 3vw, 28px) 26px; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  .brand { display:flex; align-items:center; gap:12px; min-width:0; }
+  .brand-mark { width:46px; height:46px; flex:0 0 auto; border-radius:15px; display:grid; place-items:center; background:linear-gradient(145deg,#7cf0ce,#58c8ef); box-shadow:0 7px 24px #53d7d144; font-size:26px; }
+  .brand h1 { font-size:clamp(18px,3vw,26px); line-height:1.05; margin:0; letter-spacing:-.5px; }
+  .brand p { margin:4px 0 0; color:var(--muted); font-size:12px; letter-spacing:.5px; text-transform:uppercase; }
+  .top-actions { display:flex; gap:8px; }
+  .btn { border:1px solid var(--line); border-radius:12px; padding:10px 13px; color:#eef8ff; background:rgba(255,255,255,.07); font-weight:750; transition:transform .12s, background .12s, border-color .12s; }
+  .btn:hover { transform:translateY(-1px); background:rgba(255,255,255,.12); border-color:#ffffff55; }
+  .btn.primary { color:#08243a; background:linear-gradient(135deg,var(--mint),#8de7ff); border:0; box-shadow:0 7px 20px #68e3d22b; }
+  .btn.primary:hover { background:linear-gradient(135deg,#a0ffdf,#b0f0ff); }
+  .btn.small { padding:8px 10px; font-size:13px; }
+  .panel { border:1px solid var(--line); border-radius:22px; overflow:hidden; background:linear-gradient(180deg,rgba(21,51,80,.92),rgba(11,30,51,.96)); box-shadow:0 24px 80px #0003; }
+  .view { display:none; }
+  .view.active { display:block; }
+  .hero { padding:clamp(20px,4vw,42px); text-align:center; position:relative; overflow:hidden; }
+  .hero:before, .hero:after { content:"✦"; position:absolute; color:#a6efff; opacity:.5; font-size:28px; }
+  .hero:before { left:8%; top:18%; transform:rotate(-12deg); }
+  .hero:after { right:9%; top:24%; font-size:19px; }
+  .eyebrow { display:inline-flex; align-items:center; gap:7px; border:1px solid #7cf0ce4a; color:var(--mint); background:#7cf0ce10; border-radius:99px; padding:6px 12px; font-size:12px; letter-spacing:1px; text-transform:uppercase; font-weight:850; }
+  .hero h2 { margin:17px 0 10px; font-size:clamp(30px,5vw,52px); line-height:1; letter-spacing:-1.8px; }
+  .hero h2 span { color:var(--gold); }
+  .hero .lead { max-width:650px; margin:0 auto; font-size:clamp(14px,2vw,17px); line-height:1.6; color:#c4d9e9; }
+  .howto { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:21px; }
+  .how-chip { color:#d5e9f7; background:#ffffff0b; border:1px solid #ffffff15; border-radius:99px; padding:8px 12px; font-size:13px; }
+  .mode-heading { display:flex; align-items:end; justify-content:space-between; gap:10px; padding:0 clamp(16px,3vw,30px); margin:0 0 13px; text-align:left; }
+  .mode-heading h3 { margin:0; font-size:19px; }
+  .mode-heading p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+  .mode-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; padding:0 clamp(16px,3vw,30px) 30px; text-align:left; }
+  .mode-card { border:1px solid var(--line); border-radius:19px; overflow:hidden; background:linear-gradient(150deg,#ffffff0b,#ffffff04); min-width:0; transition:transform .16s,border-color .16s,background .16s; }
+  .mode-card:hover { transform:translateY(-3px); border-color:#7cf0ce95; background:#ffffff0d; }
+  .mode-art { height:118px; display:grid; place-items:center; position:relative; overflow:hidden; }
+  .mode-art:before { content:""; position:absolute; width:160px;height:160px;border-radius:50%;background:#ffffff0b; }
+  .mode-art .art-emoji { font-size:58px; filter:drop-shadow(0 8px 8px #0003); position:relative; }
+  .mode-art.snow { background:linear-gradient(135deg,#16496a,#227e9c); }
+  .mode-art.war { background:linear-gradient(135deg,#493765,#a34e65); }
+  .mode-art.planet { background:linear-gradient(135deg,#203d70,#6f54b2); }
+  .mode-copy { padding:15px 15px 16px; }
+  .mode-copy .level { color:var(--mint); font-size:10px; letter-spacing:1.3px; font-weight:900; text-transform:uppercase; }
+  .mode-copy h4 { font-size:20px; margin:5px 0 5px; letter-spacing:-.3px; }
+  .mode-copy p { min-height:42px; margin:0; font-size:13px; color:#b9cfe0; line-height:1.5; }
+  .mode-foot { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:14px; }
+  .record { font-size:12px; color:#e2edf5; }
+  .choose { border:0; border-radius:10px; background:#7cf0ce; color:#072a3b; font-weight:900; padding:9px 11px; font-size:12px; }
+  .choose:hover { background:#a1ffdf; }
+  .footer-note { color:#84a4bc; text-align:center; padding:0 18px 24px; font-size:12px; }
+
+  /* Game UI */
+  .game-head { padding:17px clamp(12px,2.5vw,24px) 13px; border-bottom:1px solid var(--line); display:flex; gap:15px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .mission { display:flex; align-items:center; gap:10px; }
+  .mission-icon { width:43px;height:43px; display:grid;place-items:center; background:#ffffff0c;border:1px solid var(--line); border-radius:14px;font-size:24px; }
+  .mission h2 { margin:0; font-size:19px; }
+  .mission p { margin:3px 0 0; color:var(--muted); font-size:12px; }
+  .game-actions { display:flex; gap:7px; }
+  .hud { padding:12px clamp(12px,2.5vw,24px); display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+  .stat { min-width:0; background:#ffffff08;border:1px solid #ffffff12;border-radius:13px;padding:10px 12px; }
+  .stat .label { color:#8fb0c8; font-weight:800; text-transform:uppercase; letter-spacing:.9px;font-size:10px; }
+  .stat .value { font-size:clamp(17px,2.6vw,24px); font-weight:900; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .stat .value.mint { color:var(--mint); }
+  .stat .value.gold { color:var(--gold); }
+  .field-wrap { padding:0 clamp(8px,1.5vw,16px) 16px; }
+  .playfield { height:clamp(360px,55vw,490px); min-height:360px; max-height:490px; position:relative; overflow:hidden; isolation:isolate; border:1px solid #b1e4ff2b; border-radius:17px; background:linear-gradient(180deg,#153d62 0%,#235a7d 50%,#38758a 78%,#a3d2b1 100%); }
+  .playfield:before { content:""; position:absolute;inset:0;z-index:-1;opacity:.42; background-image:radial-gradient(2px 2px at 10% 14%,#fff 98%,transparent),radial-gradient(2px 2px at 23% 27%,#c9f6ff 98%,transparent),radial-gradient(1.5px 1.5px at 63% 18%,#fff 98%,transparent),radial-gradient(2px 2px at 85% 12%,#fff 98%,transparent),radial-gradient(1.5px 1.5px at 77% 36%,#b6ebff 98%,transparent),radial-gradient(1px 1px at 43% 9%,#fff 98%,transparent); }
+  .moon { position:absolute; top:22px; right:5.5%; width:54px;height:54px;border-radius:50%;background:#f7f3c9;box-shadow:0 0 38px #eff8b744; opacity:.92; }
+  .cloud { position:absolute; top:70px; left:8%; color:#d9f6ff33; font-size:46px; }
+  .cloud.c2 { top:118px; left:auto; right:20%; font-size:36px; opacity:.7; }
+  .hill { position:absolute; bottom:61px; width:75%; height:100px; left:-16%; border-radius:50% 50% 0 0; background:#387d78; opacity:.8; z-index:0; }
+  .hill.h2 { left:auto; right:-17%; width:80%; height:118px; background:#2c696c; }
+  .floor { position:absolute; z-index:1;bottom:0;left:0;right:0;height:67px;background:linear-gradient(180deg,#638f58,#305b4d);border-top:4px solid #b8db88; box-shadow:0 -8px 20px #112d2a55 inset; }
+  .floor-label { position:absolute;right:12px;bottom:9px;color:#e6f8d4;font-size:10px;font-weight:900;letter-spacing:1.4px;text-transform:uppercase;text-shadow:0 1px 3px #163d31; }
+  .village { position:absolute; z-index:2; bottom:22px; left:4%; right:4%; display:flex; justify-content:space-around; align-items:flex-end; pointer-events:none; }
+  .house { font-size:clamp(22px,4vw,37px);filter:drop-shadow(0 4px 2px #17403866); }
+  .threat { position:absolute; z-index:5; display:flex; align-items:center; justify-content:center; user-select:none; transform:translateZ(0); will-change:top; filter:drop-shadow(0 6px 5px #061b2a55); transition:filter .12s; }
+  .threat .label { position:relative;z-index:2;white-space:nowrap;line-height:1.15;text-align:center; }
+  .threat.letter { width:66px;height:66px;border-radius:50%;color:#123c55;background:radial-gradient(circle at 33% 24%,#fff 0%,#f4ffff 34%,#beeef6 100%);border:3px solid #8edbe8;box-shadow:inset -5px -7px 0 #7ac7db55,0 0 0 4px #d8fbff15; }
+  .threat.letter:before { content:"❄"; position:absolute;top:5px;right:7px;color:#72c4d8;font-size:12px;opacity:.8; }
+  .threat.letter .label { font-size:29px;font-weight:1000; }
+  .threat.word { min-width:130px;max-width:176px;height:51px;padding:0 12px 0 31px;border-radius:14px 22px 22px 14px;background:linear-gradient(180deg,#ffe3a0,#ffab5e);border:2px solid #ffdc89;color:#663315; }
+  .threat.word:before { content:"🚀";position:absolute;left:-13px;top:7px;font-size:27px;transform:rotate(-4deg); }
+  .threat.word:after { content:"";position:absolute;right:10px;bottom:-8px;width:23px;height:9px;background:#ff815d;border-radius:50%;filter:blur(4px); }
+  .threat.word .label { font-size:clamp(12px,1.6vw,15px);font-weight:1000; }
+  .threat.phrase { width:clamp(190px,28vw,242px);min-height:64px;padding:9px 12px 9px 37px;border-radius:50% 50% 43% 43% / 38% 38% 62% 62%;background:linear-gradient(180deg,#d8caff,#a58af6);border:2px solid #e6dfff;color:#30245b;box-shadow:inset 0 -9px 0 #8063cb55,0 6px 0 #58469b55; }
+  .threat.phrase:before { content:"🛸"; position:absolute;left:-10px;top:9px;font-size:28px; }
+  .threat.phrase:after { content:""; position:absolute;bottom:-10px;left:22%;width:17px;height:12px;background:#9cf4ff;border-radius:50%;box-shadow:30px 4px #d6b6ff,60px 0 #a5ffde;filter:blur(1px);opacity:.75; }
+  .threat.phrase .label { white-space:normal;font-weight:950;font-size:clamp(11px,1.35vw,14px); }
+  .typed-prefix { color:#087e66;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px; }
+  .threat.targeted { filter:drop-shadow(0 0 10px #fff9) drop-shadow(0 5px 6px #061b2a66); }
+  .threat.targeted:before { filter:drop-shadow(0 0 5px #fff); }
+  .threat.pop { animation:pop .25s ease-out forwards; }
+  @keyframes pop { 0%{opacity:1;transform:scale(1)} 45%{opacity:1;transform:scale(1.22) rotate(5deg)} 100%{opacity:0;transform:scale(.3) rotate(-10deg)} }
+  .burst { position:absolute;z-index:9;pointer-events:none;font-weight:1000;color:var(--gold);font-size:18px;text-shadow:0 2px 5px #102844;animation:float-up .8s ease-out forwards; }
+  @keyframes float-up { from{opacity:1;transform:translateY(0) scale(.8)} to{opacity:0;transform:translateY(-40px) scale(1.15)} }
+  .toast { position:absolute;z-index:12;left:50%;top:18px;transform:translateX(-50%);background:#102844eF;border:1px solid #7cf0ce6b;border-radius:999px;padding:9px 15px;color:#cffff0;font-size:13px;font-weight:900;white-space:nowrap;box-shadow:0 8px 25px #00142644;opacity:0;pointer-events:none; }
+  .toast.show { animation:toast-in 1.3s ease forwards; }
+  @keyframes toast-in { 0%{opacity:0; transform:translate(-50%,-8px)} 12%,78%{opacity:1;transform:translate(-50%,0)} 100%{opacity:0;transform:translate(-50%,-3px)} }
+  .overlay { position:absolute;z-index:15;inset:0;background:#071b30b8;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(5px); }
+  .overlay.hidden { display:none; }
+  .overlay-card { max-width:420px;width:100%;padding:25px;text-align:center;border:1px solid #c3e9ff38;border-radius:22px;background:linear-gradient(160deg,#1b4262,#102844);box-shadow:0 25px 70px #0005; }
+  .overlay-emoji { font-size:43px;line-height:1.2; }
+  .overlay-card h3 { margin:12px 0 7px;font-size:27px; }
+  .overlay-card p { margin:0 auto 18px;color:#bed5e6;font-size:14px;line-height:1.55; }
+  .overlay-card .btn { min-width:120px; }
+  .type-panel { display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:13px clamp(10px,2.5vw,24px) 17px; }
+  .typebox-wrap { position:relative; }
+  .typebox-wrap:before { content:"⌨"; position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:20px;opacity:.8; }
+  #typingInput { width:100%;height:52px;border-radius:14px;border:2px solid #6ae8d04d;background:#071c30;color:#f4fcff;padding:0 14px 0 47px;font-size:16px;font-weight:750;box-shadow:inset 0 2px 7px #0002; }
+  #typingInput::placeholder { color:#7f9fb6;font-weight:600; }
+  .type-help { color:#9bb7cb;font-size:11px;line-height:1.4;max-width:135px; }
+  .below-field { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 clamp(12px,2.5vw,24px) 17px;color:#9cb8cb;font-size:12px; }
+  .pace { display:flex;align-items:center;gap:7px; }
+  .pace-bar { width:80px;height:6px;border-radius:99px;background:#ffffff14;overflow:hidden; }
+  .pace-bar span { display:block;width:0;height:100%;background:linear-gradient(90deg,#7cf0ce,#ffd166,#ff7b83);border-radius:99px;transition:width .3s; }
+  .game-bottom { display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding:13px clamp(12px,2.5vw,24px);color:#8eabc0;font-size:12px; }
+  .legend { display:flex;flex-wrap:wrap;gap:12px; }
+  .legend span { display:inline-flex;align-items:center;gap:5px; }
+  .screen-reader { position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+  .results { padding:clamp(24px,5vw,48px);text-align:center; }
+  .results .medal { font-size:60px; }
+  .results h2 { font-size:clamp(29px,5vw,42px);margin:8px 0 7px; }
+  .results p { color:#bdd2e2;max-width:530px;margin:0 auto;line-height:1.6; }
+  .result-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:650px;margin:24px auto; }
+  .result-stat { background:#ffffff09;border:1px solid var(--line);border-radius:14px;padding:13px 7px; }
+  .result-stat strong { display:block;font-size:25px;color:var(--mint); }
+  .result-stat span { color:#98b4c8;font-size:11px;letter-spacing:.6px;text-transform:uppercase; }
+  .result-actions { display:flex;justify-content:center;gap:10px;flex-wrap:wrap; }
+  .encouragement { margin:21px auto 0!important;font-size:13px!important;color:var(--gold)!important; }
+  @media (max-width:760px) {
+    .app { padding-top:12px; }
+    .topbar { align-items:flex-start; }
+    .brand-mark { width:39px;height:39px;border-radius:12px;font-size:22px; }
+    .top-actions .btn { padding:8px 9px;font-size:12px; }
+    .mode-grid { grid-template-columns:1fr; }
+    .mode-card { display:grid;grid-template-columns:105px minmax(0,1fr); }
+    .mode-art { height:100%;min-height:145px; }
+    .mode-art .art-emoji { font-size:48px; }
+    .mode-copy p { min-height:0; }
+    .mode-foot { margin-top:10px; }
+    .hud { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .stat:nth-child(4), .stat:nth-child(5) { grid-column:span 1; }
+    .stat { padding:8px 10px; }
+    .stat .value { font-size:20px; }
+    .game-head { align-items:flex-start; }
+    .game-actions { flex-wrap:wrap;justify-content:flex-end; }
+    .mission h2 { font-size:17px; }
+    .playfield { height:clamp(360px,72vw,455px); }
+    .type-panel { grid-template-columns:1fr; }
+    .type-help { max-width:none; }
+    .below-field { align-items:flex-start;flex-direction:column; }
+    .result-stats { grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:420px) {
+    .brand p { font-size:9px; }
+    .top-actions { gap:5px; }
+    .top-actions .btn { font-size:11px;padding:7px 8px; }
+    .mode-card { grid-template-columns:86px minmax(0,1fr); }
+    .mode-copy { padding:12px; }
+    .mode-copy h4 { font-size:18px; }
+    .mode-art .art-emoji { font-size:40px; }
+    .game-actions .btn { font-size:11px;padding:7px 8px; }
+    .threat.phrase { width:190px; }
+  }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">⌨️</div>
+      <div><h1>Village Typing Defenders</h1><p>Type quick. Save the village.</p></div>
+    </div>
+    <div class="top-actions">
+      <button id="homeSoundBtn" class="btn small" type="button" aria-pressed="true">🔊 Sound on</button>
+      <button id="homeBtn" class="btn small" type="button" hidden>⌂ Home</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="homeView" class="panel view active" aria-labelledby="heroTitle">
+      <div class="hero">
+        <div class="eyebrow">✨ A typing adventure for ages 9–13</div>
+        <h2 id="heroTitle">Ready, set, <span>type!</span></h2>
+        <p class="lead">Friendly snowballs, word rockets, and phrase UFOs are drifting toward the village. Type what you see to turn every threat into sparkles before it reaches the ground!</p>
+        <div class="howto">
+          <span class="how-chip">⌨️ Type the target</span><span class="how-chip">⭐ Earn stars and streaks</span><span class="how-chip">🛡️ Protect 3 village shields</span>
+        </div>
+      </div>
+      <div class="mode-heading"><div><h3>Choose your mission</h3><p>Start easy, then challenge your typing skills.</p></div></div>
+      <div class="mode-grid">
+        <article class="mode-card">
+          <div class="mode-art snow"><span class="art-emoji" aria-hidden="true">❄️</span></div>
+          <div class="mode-copy"><div class="level">Level 1 · Easy</div><h4>Snowballville</h4><p>Type single letters to pop icy snowballs. Great for a warm-up!</p><div class="mode-foot"><span class="record" id="best-letter">Best: 0</span><button class="choose" data-mode="letter" type="button">Play →</button></div></div>
+        </article>
+        <article class="mode-card">
+          <div class="mode-art war"><span class="art-emoji" aria-hidden="true">🚀</span></div>
+          <div class="mode-copy"><div class="level">Level 2 · Medium</div><h4>War Zone</h4><p>Type full words to redirect cartoon rockets into confetti.</p><div class="mode-foot"><span class="record" id="best-word">Best: 0</span><button class="choose" data-mode="word" type="button">Play →</button></div></div>
+        </article>
+        <article class="mode-card">
+          <div class="mode-art planet"><span class="art-emoji" aria-hidden="true">🛸</span></div>
+          <div class="mode-copy"><div class="level">Level 3 · Challenge</div><h4>Planet Crisis</h4><p>Type whole phrases to send friendly UFOs safely back to space.</p><div class="mode-foot"><span class="record" id="best-phrase">Best: 0</span><button class="choose" data-mode="phrase" type="button">Play →</button></div></div>
+        </article>
+      </div>
+      <div class="footer-note">No scary battles — just quick fingers, bright sparkles, and typing practice. 🌈</div>
+    </section>
+
+    <section id="gameView" class="panel view" aria-label="Typing game">
+      <div class="game-head">
+        <div class="mission"><div class="mission-icon" id="missionIcon">❄️</div><div><h2 id="missionTitle">Snowballville</h2><p id="missionSubtitle">Type the letter to pop the snowball.</p></div></div>
+        <div class="game-actions"><button id="pauseBtn" class="btn small" type="button">Ⅱ Pause</button><button id="soundBtn" class="btn small" type="button">🔊 Sound</button><button id="quitBtn" class="btn small" type="button">↩ Exit</button></div>
+      </div>
+      <div class="hud" aria-label="Game stats">
+        <div class="stat"><div class="label">Score</div><div id="scoreVal" class="value gold">0</div></div>
+        <div class="stat"><div class="label">Saved</div><div id="savedVal" class="value mint">0</div></div>
+        <div class="stat"><div class="label">Streak</div><div id="streakVal" class="value">0 🔥</div></div>
+        <div class="stat"><div class="label">Stars earned</div><div id="starsVal" class="value gold">0 ⭐</div></div>
+        <div class="stat"><div class="label">Village shields</div><div id="livesVal" class="value">🛡️🛡️🛡️</div></div>
+      </div>
+      <div class="field-wrap">
+        <div id="playfield" class="playfield" aria-label="Threats are falling toward the village">
+          <div class="moon" aria-hidden="true"></div><div class="cloud" aria-hidden="true">☁</div><div class="cloud c2" aria-hidden="true">☁</div>
+          <div class="hill" aria-hidden="true"></div><div class="hill h2" aria-hidden="true"></div>
+          <div class="village" aria-hidden="true"><span class="house">🏡</span><span class="house">🏠</span><span class="house">🏡</span><span class="house">🏠</span><span class="house">🏡</span></div>
+          <div class="floor" aria-hidden="true"><span class="floor-label">Village floor · protect it!</span></div>
+          <div id="toast" class="toast" aria-live="polite"></div>
+          <div id="overlay" class="overlay">
+            <div class="overlay-card"><div id="overlayEmoji" class="overlay-emoji">🚦</div><h3 id="overlayTitle">Ready?</h3><p id="overlayText">Type the characters on the falling targets. Keep them away from the village floor!</p><button id="overlayBtn" class="btn primary" type="button">Start mission</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="type-panel">
+        <div class="typebox-wrap"><label class="screen-reader" for="typingInput">Type the falling target here</label><input id="typingInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Click here, then type the target…" aria-describedby="typeHelp"></div>
+        <div id="typeHelp" class="type-help">Letters pop one at a time. For words and phrases, type the whole target.</div>
+      </div>
+      <div class="below-field"><div class="pace"><strong style="color:#cee4f3">Falling speed</strong><span id="paceText">Chill</span><span class="pace-bar"><span id="paceFill"></span></span></div><div id="nextReward">Next star: save 5 threats ⭐</div></div>
+      <div class="game-bottom"><div class="legend"><span>❄️ Snowball = letter</span><span>🚀 Rocket = word</span><span>🛸 UFO = phrase</span></div><div>Every 5 saves earns a star. Every 5-hit streak earns a bonus!</div></div>
+    </section>
+
+    <section id="resultsView" class="panel view" aria-labelledby="resultsTitle">
+      <div class="results"><div id="resultMedal" class="medal">🏅</div><h2 id="resultsTitle">Village protected!</h2><p id="resultsCopy">Great effort! Every round gives your fingers more practice.</p>
+        <div class="result-stats"><div class="result-stat"><strong id="resultScore">0</strong><span>Final score</span></div><div class="result-stat"><strong id="resultSaved">0</strong><span>Threats saved</span></div><div class="result-stat"><strong id="resultAccuracy">100%</strong><span>Save rate</span></div><div class="result-stat"><strong id="resultStars">0 ⭐</strong><span>Stars earned</span></div></div>
+        <div id="resultActions" class="result-actions"><button id="againBtn" class="btn primary" type="button">Play again</button><button id="resultHomeBtn" class="btn" type="button">Choose another mission</button></div>
+        <p id="encouragement" class="encouragement">Every keystroke is practice. Keep going!</p>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const views = { home: $('homeView'), game: $('gameView'), results: $('resultsView') };
+  const playfield = $('playfield');
+  const typingInput = $('typingInput');
+  const overlay = $('overlay');
+  const modeConfig = {
+    letter: { name:'Snowballville', icon:'❄️', subtitle:'Type the letter to pop the snowball.', kind:'letter', baseSpeed:21, spawnMs:1600, points:10, maxThreats:7,
+      words: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') },
+    word: { name:'War Zone', icon:'🚀', subtitle:'Type the whole word to reroute the rocket.', kind:'word', baseSpeed:19, spawnMs:2050, points:25, maxThreats:5,
+      words:['planet','rocket','friend','puzzle','comet','bright','smile','garden','typing','silver','cookie','brave','dream','rocket','rescue','jungle','music','sparkle','school','kindness','rainbow','bubble','forest','wonder','helper','sunshine','lantern','meteor','dragon','picnic'] },
+    phrase: { name:'Planet Crisis', icon:'🛸', subtitle:'Type the full phrase to guide the UFO away.', kind:'phrase', baseSpeed:17, spawnMs:2550, points:50, maxThreats:4,
+      words:['save the moon','kind words shine','type with care','stars guide us','protect our planet','help every friend','keep trying today','the village is safe','practice makes progress','brave minds learn','make room for wonder','teamwork makes us stronger','share a little kindness','small steps go far','the sky is full of stars','you can do hard things'] }
+  };
+  const state = {
+    mode:null, running:false, paused:false, ended:false, threats:[], nextId:1,
+    score:0, saved:0, misses:0, lives:3, streak:0, bestStreak:0, stars:0,
+    typed:'', lockedId:null, elapsed:0, spawnElapsed:0, lastTime:0, raf:0,
+    sound:true, audio:null, toastTimer:0, lastLane:null, modeStartTime:0
+  };
+  const bestKey = (mode) => `villageTypingBest_${mode}`;
+  function getBest(mode) { try { return Number(localStorage.getItem(bestKey(mode)) || 0); } catch (_) { return 0; } }
+  function setBest(mode, score) { try { localStorage.setItem(bestKey(mode), String(Math.max(getBest(mode), score))); } catch (_) {} }
+  function renderBests() { for (const m of Object.keys(modeConfig)) { const el = $(`best-${m}`); if (el) el.textContent = `Best: ${getBest(m)}`; } }
+  renderBests();
+
+  function showView(which) {
+    Object.entries(views).forEach(([k, el]) => el.classList.toggle('active', k === which));
+    $('homeBtn').hidden = which === 'home';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function initAudio() {
+    if (!state.audio) {
+      try { state.audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { state.audio = null; }
+    }
+    if (state.audio && state.audio.state === 'suspended') state.audio.resume().catch(()=>{});
+  }
+  function tone(freq, at, duration, type, volume, endFreq) {
+    if (!state.sound || !state.audio) return;
+    const ctx = state.audio; const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.type = type || 'sine'; osc.frequency.setValueAtTime(freq, at);
+    if (endFreq) osc.frequency.exponentialRampToValueAtTime(Math.max(25,endFreq), at + duration);
+    gain.gain.setValueAtTime(0.0001, at); gain.gain.exponentialRampToValueAtTime(volume || 0.08, at + Math.min(.018,duration*.3));
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+    osc.connect(gain); gain.connect(ctx.destination); osc.start(at); osc.stop(at + duration + .03);
+  }
+  function successSound() {
+    initAudio(); if (!state.audio || !state.sound) return; const t=state.audio.currentTime;
+    tone(520,t,.12,'sine',.08); tone(780,t+.07,.14,'triangle',.075); tone(1040,t+.14,.21,'sine',.07);
+  }
+  function missSound() {
+    initAudio(); if (!state.audio || !state.sound) return; const t=state.audio.currentTime;
+    tone(260,t,.18,'triangle',.095,115); tone(105,t+.06,.16,'sine',.05,65);
+  }
+  function errorSound() { initAudio(); if (!state.audio || !state.sound) return; tone(180,state.audio.currentTime,.07,'square',.025,135); }
+  function setSound(on) {
+    state.sound = on;
+    const label = on ? '🔊 Sound on' : '🔇 Sound off';
+    $('homeSoundBtn').textContent = label; $('homeSoundBtn').setAttribute('aria-pressed',String(on));
+    $('soundBtn').textContent = on ? '🔊 Sound' : '🔇 Sound';
+  }
+  function setOverlay(title, text, emoji, buttonText, callback) {
+    $('overlayTitle').textContent=title; $('overlayText').textContent=text; $('overlayEmoji').textContent=emoji; $('overlayBtn').textContent=buttonText;
+    $('overlayBtn').onclick=callback; overlay.classList.remove('hidden');
+  }
+  function hideOverlay() { overlay.classList.add('hidden'); }
+  function clearThreatElements() { state.threats.forEach(t=>t.el.remove()); state.threats=[]; }
+  function startMode(mode) {
+    initAudio();
+    state.mode = mode; state.running=false; state.paused=false; state.ended=false;
+    state.score=0; state.saved=0; state.misses=0; state.lives=3; state.streak=0; state.bestStreak=0; state.stars=0;
+    state.typed=''; state.lockedId=null; state.elapsed=0; state.spawnElapsed=0; state.lastTime=0; state.lastLane=null; state.modeStartTime=performance.now();
+    clearThreatElements(); typingInput.value='';
+    const cfg=modeConfig[mode];
+    $('missionIcon').textContent=cfg.icon; $('missionTitle').textContent=cfg.name; $('missionSubtitle').textContent=cfg.subtitle; $('pauseBtn').textContent='Ⅱ Pause';
+    $('typeHelp').textContent = mode==='letter' ? 'Type any letter on a snowball. One key = one save.' : mode==='word' ? 'Type the whole word shown on a rocket. Backspace works too.' : 'Type the whole phrase, including spaces, to guide the UFO away.';
+    $('paceText').textContent='Chill'; $('paceFill').style.width='0%'; $('nextReward').textContent='Next star: save 5 threats ⭐';
+    updateHud(); showView('game');
+    setOverlay('Ready, defender?', 'Type the characters on the falling targets. Keep them away from the village floor — each miss costs one shield.', cfg.icon, 'Start mission', beginRun);
+  }
+  function beginRun() {
+    initAudio(); hideOverlay(); state.running=true; state.paused=false; state.lastTime=performance.now(); state.spawnElapsed=0;
+    typingInput.value=''; state.typed=''; typingInput.placeholder=state.mode==='letter'?'Type a letter…':state.mode==='word'?'Type a rocket word…':'Type the UFO phrase…';
+    typingInput.focus({preventScroll:true}); state.raf=requestAnimationFrame(tick);
+    spawnThreat();
+  }
+  function pauseGame() {
+    if (!state.mode || state.ended) return;
+    if (!state.paused) {
+      state.paused=true; state.running=false; cancelAnimationFrame(state.raf);
+      setOverlay('Mission paused', 'Take a breath. Your village and your progress are safe. Ready when you are!', '⏸️', 'Resume mission', () => {
+        hideOverlay(); state.paused=false; state.running=true; state.lastTime=performance.now(); state.raf=requestAnimationFrame(tick); typingInput.focus({preventScroll:true}); $('pauseBtn').textContent='Ⅱ Pause';
+      });
+      $('pauseBtn').textContent='▶ Resume';
+    } else {
+      state.paused=false; state.running=true; hideOverlay(); state.lastTime=performance.now(); state.raf=requestAnimationFrame(tick); typingInput.focus({preventScroll:true}); $('pauseBtn').textContent='Ⅱ Pause';
+    }
+  }
+  function quitToHome() {
+    state.running=false;state.paused=false;state.ended=true;cancelAnimationFrame(state.raf);clearThreatElements();hideOverlay();
+    state.mode=null;typingInput.value='';showView('home');renderBests();
+  }
+  function getThreatLabel() {
+    const cfg=modeConfig[state.mode];
+    if (cfg.kind==='letter') return cfg.words[Math.floor(Math.random()*cfg.words.length)];
+    return cfg.words[Math.floor(Math.random()*cfg.words.length)];
+  }
+  function threatWidth(kind) { return kind==='letter' ? 66 : kind==='word' ? 154 : Math.min(242, Math.max(190, playfield.clientWidth*.29)); }
+  function spawnThreat() {
+    if (!state.running || !state.mode) return;
+    const cfg=modeConfig[state.mode];
+    if (state.threats.filter(t=>!t.dead).length >= cfg.maxThreats) return;
+    const label=getThreatLabel(); const kind=cfg.kind; const w=threatWidth(kind);
+    const margin=8; let x=margin+Math.random()*Math.max(1,playfield.clientWidth-w-margin*2);
+    // Keep nearby targets apart so the labels stay readable.
+    for (let tries=0;tries<10;tries++) {
+      const overlaps=state.threats.some(t=>!t.dead && Math.abs((t.x+t.w/2)-(x+w/2)) < (t.w+w)/2+15 && Math.abs(t.y-(-40))<115);
+      if (!overlaps) break;
+      x=margin+Math.random()*Math.max(1,playfield.clientWidth-w-margin*2);
+    }
+    const el=document.createElement('div'); el.className=`threat ${kind}`; if (kind==='word' || kind==='phrase') el.style.width=`${w}px`; el.style.left=`${Math.max(margin,Math.min(x,playfield.clientWidth-w-margin))}px`; el.style.top='-80px';
+    const labelEl=document.createElement('span'); labelEl.className='label'; labelEl.textContent=label; el.appendChild(labelEl);
+    el.setAttribute('aria-label', `${kind==='letter'?'Letter':kind==='word'?'Word':'Phrase'} target: ${label}`);
+    playfield.appendChild(el);
+    const threat={id:state.nextId++,label,kind,x:parseFloat(el.style.left),y:-80,w,h:kind==='letter'?66:kind==='word'?51:68,el,labelEl,dead:false};
+    state.threats.push(threat);
+    if (state.typed) refreshTargetHighlight();
+  }
+  function findTargetForPrefix(prefix) {
+    if (!prefix) return null;
+    const lower=prefix.toLowerCase();
+    const candidates=state.threats.filter(t=>!t.dead && t.label.toLowerCase().startsWith(lower));
+    if (!candidates.length) return null;
+    candidates.sort((a,b)=>b.y-a.y); // prioritize the target closest to the floor
+    return candidates[0];
+  }
+  function refreshTargetHighlight() {
+    state.threats.forEach(t=>{
+      t.el.classList.remove('targeted');
+      if (t.dead) return;
+      if (state.mode==='letter') return;
+      if (t.id===state.lockedId && state.typed) {
+        t.el.classList.add('targeted');
+        const n=state.typed.length; const l=t.label;
+        t.labelEl.innerHTML=`<span class="typed-prefix">${escapeHtml(l.slice(0,n))}</span>${escapeHtml(l.slice(n))}`;
+      } else { t.labelEl.textContent=t.label; }
+    });
+  }
+  function escapeHtml(s) { return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function burstAt(t, message) {
+    const b=document.createElement('div');b.className='burst';b.textContent=message;
+    b.style.left=`${t.x+t.w/2}px`;b.style.top=`${Math.max(20,t.y)}px`;playfield.appendChild(b);setTimeout(()=>b.remove(),900);
+  }
+  function showToast(text) {
+    const toast=$('toast'); toast.textContent=text; toast.classList.remove('show'); void toast.offsetWidth; toast.classList.add('show');
+  }
+  function neutralize(t) {
+    if (!t || t.dead) return;
+    const cfg=modeConfig[state.mode]; t.dead=true; t.el.classList.add('pop');
+    const oldStreak=state.streak; state.saved++; state.streak++; state.bestStreak=Math.max(state.bestStreak,state.streak);
+    let award=cfg.points; let message=`+${cfg.points} pts!`;
+    if (state.saved%5===0) { state.stars++; award+=25; message=`⭐ Star earned! +${award} pts`; }
+    if (state.streak%5===0) { award+=25; message=`🔥 ${state.streak}-hit streak! +${award} pts`; }
+    state.score+=award; successSound(); burstAt(t,`+${award}`);
+    if (state.saved%5===0 || state.streak%5===0) showToast(message); else showToast(`✨ Nice typing! +${award} points`);
+    if (state.saved%5===0) showToast(`⭐ Star earned! ${state.stars} total`);
+    state.typed='';state.lockedId=null;typingInput.value='';refreshTargetHighlight();updateHud();
+    setTimeout(()=>{ if(t.el && t.el.isConnected) t.el.remove(); },260);
+  }
+  function handleTyping(raw) {
+    if (!state.running || state.paused || state.ended || !state.mode) return;
+    const cfg=modeConfig[state.mode];
+    if (cfg.kind==='letter') {
+      const letters=raw.toUpperCase().match(/[A-Z]/g); const letter=letters ? letters[letters.length-1] : '';
+      typingInput.value='';state.typed='';state.lockedId=null;
+      if (!letter) return;
+      const candidates=state.threats.filter(t=>!t.dead && t.label.toUpperCase()===letter).sort((a,b)=>b.y-a.y);
+      if (candidates.length) neutralize(candidates[0]); else errorSound();
+      return;
+    }
+    const proposed=raw.slice(0,60);
+    if (!proposed) { state.typed='';state.lockedId=null;refreshTargetHighlight();return; }
+    let target=state.lockedId ? state.threats.find(t=>t.id===state.lockedId && !t.dead) : null;
+    if (target && target.label.toLowerCase().startsWith(proposed.toLowerCase())) {
+      state.typed=proposed;
+    } else {
+      target=findTargetForPrefix(proposed);
+      if (!target) {
+        errorSound();state.typed='';state.lockedId=null;typingInput.value='';refreshTargetHighlight();return;
+      }
+      state.typed=proposed;state.lockedId=target.id;
+    }
+    if (target) state.lockedId=target.id;
+    refreshTargetHighlight();
+    if (target && proposed.toLowerCase()===target.label.toLowerCase()) neutralize(target);
+  }
+  function updateHud() {
+    $('scoreVal').textContent=state.score.toLocaleString(); $('savedVal').textContent=state.saved;
+    $('streakVal').textContent=`${state.streak} 🔥`; $('starsVal').textContent=`${state.stars} ⭐`;
+    $('livesVal').textContent='🛡️'.repeat(state.lives)+'♡'.repeat(3-state.lives);
+    const speed=state.mode ? modeConfig[state.mode].baseSpeed+Math.min(state.saved*1.35,42) : 0;
+    const pct=Math.min(100,Math.round((speed-15)/55*100));$('paceFill').style.width=`${pct}%`;
+    $('paceText').textContent= speed<30?'Chill':speed<42?'Warming up':speed<56?'Zooming!':'Lightning!';
+    const toStar=5-(state.saved%5);$('nextReward').textContent=state.saved>0 && state.saved%5===0 ? `Star earned! ${state.stars} total ⭐` : `Next star: save ${toStar} more ⭐`;
+  }
+  function missThreat(t) {
+    if (t.dead) return;
+    t.dead=true; t.el.remove(); state.misses++;state.lives=Math.max(0,state.lives-1);state.streak=0;state.typed='';state.lockedId=null;typingInput.value='';
+    missSound();showToast('💨 Missed! One village shield lost');updateHud();refreshTargetHighlight();
+    if (state.lives<=0) endGame(false);
+  }
+  function tick(now) {
+    if (!state.running || state.paused || state.ended) return;
+    const dt=Math.min(.05,Math.max(0,(now-state.lastTime)/1000)); state.lastTime=now;state.elapsed+=dt;state.spawnElapsed+=dt*1000;
+    const cfg=modeConfig[state.mode]; const speed=cfg.baseSpeed+Math.min(state.saved*1.35,42);
+    for (const t of [...state.threats]) {
+      if (t.dead) continue;
+      t.y += speed*dt; t.el.style.top=`${t.y}px`;
+      const floorLine=playfield.clientHeight-68-t.h*.35;
+      if (t.y>=floorLine) missThreat(t);
+      if (state.ended) break;
+    }
+    const spawnInterval=Math.max(cfg.spawnMs*.52,cfg.spawnMs-state.saved*22);
+    if (state.spawnElapsed>=spawnInterval) { state.spawnElapsed=0;spawnThreat(); }
+    if (state.running) state.raf=requestAnimationFrame(tick);
+  }
+  function endGame(won) {
+    state.running=false;state.paused=false;state.ended=true;cancelAnimationFrame(state.raf);clearThreatElements();
+    if (state.mode) setBest(state.mode,state.score);renderBests();
+    const total=state.saved+state.misses;const rate=total?Math.round(state.saved/total*100):100;
+    $('resultScore').textContent=state.score.toLocaleString();$('resultSaved').textContent=state.saved;$('resultAccuracy').textContent=`${rate}%`;$('resultStars').textContent=`${state.stars} ⭐`;
+    const rank=state.saved>=25?'Cosmic Defender':state.saved>=15?'Phrase Guardian':state.saved>=10?'Word Wizard':state.saved>=5?'Village Hero':'Village Helper';
+    $('resultsTitle').textContent=state.lives===0?'The village needs a recharge!':'Mission complete!';
+    $('resultMedal').textContent=state.saved>=20?'🏆':state.saved>=10?'🥇':state.saved>=5?'🥈':'🌟';
+    $('resultsCopy').textContent=`You neutralized ${state.saved} ${state.saved===1?'threat':'threats'} and earned ${state.score.toLocaleString()} points in ${modeConfig[state.mode].name}. ${rank} rank achieved!`;
+    const cheer=state.saved>=15?'Incredible typing! Your focus and rhythm are getting strong.':state.saved>=8?'Great work! Notice how much faster you got as you saved more targets.':state.saved>=3?'Nice effort! Try again and see whether you can beat your best score.':'Every round is practice. Aim for a steady rhythm, and you will improve!';
+    $('encouragement').textContent=cheer;
+    $('againBtn').textContent='Play this mission again';
+    showView('results');
+  }
+
+  $('typingInput').addEventListener('input',()=>handleTyping(typingInput.value));
+  // Reset on explicit backspace/escape even if some mobile keyboards do not emit an input event for a clearing action.
+  typingInput.addEventListener('keydown',(e)=>{
+    if (e.key==='Escape') { e.preventDefault();typingInput.value='';state.typed='';state.lockedId=null;refreshTargetHighlight(); }
+  });
+  playfield.addEventListener('pointerdown',(e)=>{ if (state.running && !e.target.closest('button')) typingInput.focus({preventScroll:true}); });
+  $('homeSoundBtn').addEventListener('click',()=>{setSound(!state.sound);if(state.sound)initAudio();});
+  $('soundBtn').addEventListener('click',()=>{setSound(!state.sound);if(state.sound)initAudio();});
+  $('homeBtn').addEventListener('click',quitToHome);
+  $('pauseBtn').addEventListener('click',pauseGame);
+  $('quitBtn').addEventListener('click',quitToHome);
+  $('resultHomeBtn').addEventListener('click',quitToHome);
+  $('againBtn').addEventListener('click',()=>startMode(state.mode));
+  document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>startMode(btn.dataset.mode)));
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden && state.running) pauseGame(); });
+  setSound(true);
+})();
+</script>
+</body>
+</html>
