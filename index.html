@@ -475,7 +475,7 @@
     clearThreatElements(); typingInput.value='';
     const cfg=modeConfig[mode];
     $('missionIcon').textContent=cfg.icon; $('missionTitle').textContent=cfg.name; $('missionSubtitle').textContent=cfg.subtitle; $('pauseBtn').textContent='Ⅱ Pause';
-    $('typeHelp').textContent = mode==='letter' ? 'Type any letter on a snowball. One key = one save.' : mode==='word' ? 'Type the whole word shown on a rocket. The word bank favors familiar short words.' : 'Type the whole silly phrase, including spaces, to guide the UFO away.';
+    $('typeHelp').textContent = mode==='letter' ? 'Type any letter on a snowball. One key = one save.' : mode==='word' ? 'Type the whole word shown on a rocket. If you mistype, only the wrong key is ignored—your correct letters stay.' : 'Type the whole silly phrase, including spaces. If you mistype, only the wrong key is ignored—your correct letters stay.';
     $('paceText').textContent='Chill'; $('paceFill').style.width='0%'; $('nextReward').textContent='Next star: save 5 threats ⭐';
     updateHud(); showView('game');
     setOverlay('Ready, defender?', 'Type the characters on the falling targets. Keep them away from the village floor — each miss costs one shield.', cfg.icon, 'Start mission', beginRun);
@@ -612,20 +612,45 @@
       return;
     }
     const proposed=raw.slice(0,60);
-    if (!proposed) { state.typed='';state.lockedId=null;refreshTargetHighlight();return; }
+    if (!proposed) { state.typed='';state.lockedId=null;typingInput.value='';refreshTargetHighlight();return; }
     let target=state.lockedId ? state.threats.find(t=>t.id===state.lockedId && !t.dead) : null;
-    if (target && target.label.toLowerCase().startsWith(proposed.toLowerCase())) {
-      state.typed=proposed;
+    const proposedLower=proposed.toLowerCase();
+    const previousTyped=state.typed;
+
+    if (target) {
+      const targetLower=target.label.toLowerCase();
+      if (targetLower.startsWith(proposedLower)) {
+        // Correct typing or Backspace: keep the valid prefix as the player's progress.
+        state.typed=proposed;
+      } else if (proposedLower.startsWith(previousTyped.toLowerCase()) && proposed.length>previousTyped.length) {
+        // A typo was appended. Reject only the new incorrect input, not the correct prefix.
+        // The player can immediately type the right next character without starting over.
+        typingInput.value=state.typed;
+        errorSound();
+        return;
+      } else {
+        // If the player edited/replaced the existing text, allow a new target match.
+        target=findTargetForPrefix(proposed);
+        if (!target) {
+          typingInput.value=state.typed;
+          errorSound();
+          return;
+        }
+        state.typed=proposed;
+        state.lockedId=target.id;
+      }
     } else {
       target=findTargetForPrefix(proposed);
       if (!target) {
-        errorSound();state.typed='';state.lockedId=null;typingInput.value='';refreshTargetHighlight();return;
+        // There is no valid target for this first character; ignore it and stay ready.
+        typingInput.value='';state.typed='';state.lockedId=null;
+        errorSound();refreshTargetHighlight();return;
       }
       state.typed=proposed;state.lockedId=target.id;
     }
     if (target) state.lockedId=target.id;
     refreshTargetHighlight();
-    if (target && proposed.toLowerCase()===target.label.toLowerCase()) neutralize(target);
+    if (target && proposedLower===target.label.toLowerCase()) neutralize(target);
   }
   function updateHud() {
     $('scoreVal').textContent=state.score.toLocaleString(); $('savedVal').textContent=state.saved;
