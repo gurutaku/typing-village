@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#102844">
 <title>Village Typing Defenders</title>
 <style>
@@ -12,19 +12,22 @@
     --panel:rgba(15,39,65,.92); --line:rgba(190,230,255,.18);
   }
   * { box-sizing:border-box; }
+  html { min-height:100%; -webkit-text-size-adjust:100%; }
+  body { -webkit-tap-highlight-color:transparent; }
   html, body { margin:0; min-height:100%; background:var(--deep); color:#f6fbff; font-family: ui-rounded, "Trebuchet MS", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   body { min-height:100vh; overflow-x:hidden; background:radial-gradient(ellipse at 50% 0%, #234d72 0%, #102844 48%, #09172a 100%); }
   button, input { font:inherit; }
-  button { cursor:pointer; }
+  button { cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+  button, input { font-size:16px; }
   button:focus-visible, input:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
-  .app { width:min(1180px, 100%); margin:0 auto; padding:20px clamp(12px, 3vw, 28px) 26px; }
+  .app { width:min(1180px, 100%); margin:0 auto; padding:20px clamp(12px, 3vw, 28px) calc(26px + env(safe-area-inset-bottom)); }
   .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
   .brand { display:flex; align-items:center; gap:12px; min-width:0; }
   .brand-mark { width:46px; height:46px; flex:0 0 auto; border-radius:15px; display:grid; place-items:center; background:linear-gradient(145deg,#7cf0ce,#58c8ef); box-shadow:0 7px 24px #53d7d144; font-size:26px; }
   .brand h1 { font-size:clamp(18px,3vw,26px); line-height:1.05; margin:0; letter-spacing:-.5px; }
   .brand p { margin:4px 0 0; color:var(--muted); font-size:12px; letter-spacing:.5px; text-transform:uppercase; }
   .top-actions { display:flex; gap:8px; }
-  .btn { border:1px solid var(--line); border-radius:12px; padding:10px 13px; color:#eef8ff; background:rgba(255,255,255,.07); font-weight:750; transition:transform .12s, background .12s, border-color .12s; }
+  .btn { min-height:44px; border:1px solid var(--line); border-radius:12px; padding:10px 13px; color:#eef8ff; background:rgba(255,255,255,.07); font-weight:750; transition:transform .12s, background .12s, border-color .12s; }
   .btn:hover { transform:translateY(-1px); background:rgba(255,255,255,.12); border-color:#ffffff55; }
   .btn.primary { color:#08243a; background:linear-gradient(135deg,var(--mint),#8de7ff); border:0; box-shadow:0 7px 20px #68e3d22b; }
   .btn.primary:hover { background:linear-gradient(135deg,#a0ffdf,#b0f0ff); }
@@ -60,7 +63,7 @@
   .mode-copy p { min-height:42px; margin:0; font-size:13px; color:#b9cfe0; line-height:1.5; }
   .mode-foot { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:14px; }
   .record { font-size:12px; color:#e2edf5; }
-  .choose { border:0; border-radius:10px; background:#7cf0ce; color:#072a3b; font-weight:900; padding:9px 11px; font-size:12px; }
+  .choose { min-height:44px; border:0; border-radius:10px; background:#7cf0ce; color:#072a3b; font-weight:900; padding:9px 11px; font-size:12px; }
   .choose:hover { background:#a1ffdf; }
   .footer-note { color:#84a4bc; text-align:center; padding:0 18px 24px; font-size:12px; }
 
@@ -78,7 +81,7 @@
   .stat .value.mint { color:var(--mint); }
   .stat .value.gold { color:var(--gold); }
   .field-wrap { padding:0 clamp(8px,1.5vw,16px) 16px; }
-  .playfield { height:clamp(360px,55vw,490px); min-height:360px; max-height:490px; position:relative; overflow:hidden; isolation:isolate; border:1px solid #b1e4ff2b; border-radius:17px; background:linear-gradient(180deg,#153d62 0%,#235a7d 50%,#38758a 78%,#a3d2b1 100%); }
+  .playfield { height:clamp(320px,55vw,490px); min-height:320px; max-height:490px; position:relative; overflow:hidden; isolation:isolate; border:1px solid #b1e4ff2b; border-radius:17px; background:linear-gradient(180deg,#153d62 0%,#235a7d 50%,#38758a 78%,#a3d2b1 100%); }
   .playfield:before { content:""; position:absolute;inset:0;z-index:-1;opacity:.42; background-image:radial-gradient(2px 2px at 10% 14%,#fff 98%,transparent),radial-gradient(2px 2px at 23% 27%,#c9f6ff 98%,transparent),radial-gradient(1.5px 1.5px at 63% 18%,#fff 98%,transparent),radial-gradient(2px 2px at 85% 12%,#fff 98%,transparent),radial-gradient(1.5px 1.5px at 77% 36%,#b6ebff 98%,transparent),radial-gradient(1px 1px at 43% 9%,#fff 98%,transparent); }
   .moon { position:absolute; top:22px; right:5.5%; width:54px;height:54px;border-radius:50%;background:#f7f3c9;box-shadow:0 0 38px #eff8b744; opacity:.92; }
   .cloud { position:absolute; top:70px; left:8%; color:#d9f6ff33; font-size:46px; }
@@ -122,7 +125,7 @@
   .type-panel { display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:13px clamp(10px,2.5vw,24px) 17px; }
   .typebox-wrap { position:relative; }
   .typebox-wrap:before { content:"⌨"; position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:20px;opacity:.8; }
-  #typingInput { width:100%;height:52px;border-radius:14px;border:2px solid #6ae8d04d;background:#071c30;color:#f4fcff;padding:0 14px 0 47px;font-size:16px;font-weight:750;box-shadow:inset 0 2px 7px #0002; }
+  #typingInput { width:100%;height:54px;border-radius:14px;border:2px solid #6ae8d04d;background:#071c30;color:#f4fcff;padding:0 14px 0 47px;font-size:16px;font-weight:750;box-shadow:inset 0 2px 7px #0002; }
   #typingInput::placeholder { color:#7f9fb6;font-weight:600; }
   .type-help { color:#9bb7cb;font-size:11px;line-height:1.4;max-width:135px; }
   .below-field { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 clamp(12px,2.5vw,24px) 17px;color:#9cb8cb;font-size:12px; }
@@ -143,7 +146,7 @@
   .result-stat span { color:#98b4c8;font-size:11px;letter-spacing:.6px;text-transform:uppercase; }
   .result-actions { display:flex;justify-content:center;gap:10px;flex-wrap:wrap; }
   .encouragement { margin:21px auto 0!important;font-size:13px!important;color:var(--gold)!important; }
-  @media (max-width:760px) {
+  @media (max-width:820px) {
     .app { padding-top:12px; }
     .topbar { align-items:flex-start; }
     .brand-mark { width:39px;height:39px;border-radius:12px;font-size:22px; }
@@ -178,11 +181,100 @@
     .game-actions .btn { font-size:11px;padding:7px 8px; }
     .threat.phrase { width:190px; }
   }
+
+  /* Touch keyboard and compact touch-device layout */
+  .keyboard-mode-btn[hidden] { display:none !important; }
+  .keyboard-mode-btn { display:inline-flex; align-items:center; justify-content:center; margin-top:7px; padding:6px 10px; min-height:38px; font-size:12px; }
+  .touch-keyboard { display:none; }
+  .touch-keyboard.active { display:grid; gap:5px; padding:7px clamp(8px,2vw,18px) calc(7px + env(safe-area-inset-bottom)); }
+  .key-row { display:flex; justify-content:center; gap:clamp(3px,.8vw,7px); width:100%; }
+  .virtual-key { flex:1 1 0; min-width:0; min-height:43px; border:1px solid #ffffff20; border-radius:8px; padding:0 2px; background:linear-gradient(180deg,#294f70,#173650); color:#f7fbff; font-weight:850; font-size:16px; text-transform:uppercase; box-shadow:0 2px 0 #081827; }
+  .virtual-key:active { transform:translateY(1px); background:#3b6c8e; }
+  .key-row.middle { padding-inline:4%; }
+  .key-row.bottom-row { padding-inline:13%; }
+  .virtual-key.special { flex:1.3 1 0; font-size:13px; text-transform:none; }
+  .virtual-key.special[data-vkey="backspace"] { flex:.7 1 0; font-size:22px; }
+  .virtual-key:disabled { opacity:.35; box-shadow:none; }
+  .app.mobile-game-active { position:fixed; z-index:100; inset:0; width:100%; max-width:none; height:100vh; height:100dvh; margin:0; overflow:hidden; padding:calc(5px + env(safe-area-inset-top)) 7px calc(4px + env(safe-area-inset-bottom)); }
+  body.mobile-game-active { overflow:hidden; }
+  .app.mobile-game-active .topbar { display:none; }
+  .app.mobile-game-active main { height:100%; min-height:0; }
+  .app.mobile-game-active #gameView.active { height:100%; min-height:0; display:flex; flex-direction:column; }
+  .app.mobile-game-active .game-head { flex:0 0 auto; gap:5px; padding:6px 7px; align-items:center; }
+  .app.mobile-game-active .mission { gap:7px; min-width:0; }
+  .app.mobile-game-active .mission-icon { width:34px; height:34px; border-radius:10px; font-size:20px; }
+  .app.mobile-game-active .mission h2 { font-size:14px; }
+  .app.mobile-game-active .mission p { font-size:10px; }
+  .app.mobile-game-active .game-actions { gap:4px; flex-wrap:nowrap; }
+  .app.mobile-game-active .game-actions .btn { min-height:36px; padding:5px 7px; font-size:10px; white-space:nowrap; }
+  .app.mobile-game-active .hud { flex:0 0 auto; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; padding:5px 6px 7px; }
+  .app.mobile-game-active .stat { padding:5px 3px; border-radius:8px; text-align:center; }
+  .app.mobile-game-active .stat .label { font-size:7px; letter-spacing:0; line-height:1.1; white-space:normal; }
+  .app.mobile-game-active .stat .value { font-size:14px; margin-top:3px; }
+  .app.mobile-game-active .stat:nth-child(5) .value { font-size:11px; letter-spacing:-2px; }
+  .app.mobile-game-active .field-wrap { flex:1 1 auto; min-height:0; display:flex; padding:0 5px 5px; }
+  .app.mobile-game-active .playfield { width:100%; height:100%; min-height:0; max-height:none; border-radius:12px; }
+  .app.mobile-game-active .moon { width:37px; height:37px; top:13px; }
+  .app.mobile-game-active .cloud { top:42px; font-size:32px; }
+  .app.mobile-game-active .cloud.c2 { top:67px; font-size:28px; }
+  .app.mobile-game-active .floor { height:48px; }
+  .app.mobile-game-active .floor-label { font-size:8px; right:7px; bottom:5px; }
+  .app.mobile-game-active .village { bottom:17px; }
+  .app.mobile-game-active .house { font-size:23px; }
+  .app.mobile-game-active .type-panel { flex:0 0 auto; grid-template-columns:minmax(0,1fr); gap:3px; padding:3px 7px 4px; }
+  .app.mobile-game-active #typingInput { height:42px; padding-left:40px; border-radius:10px; font-size:16px; }
+  .app.mobile-game-active .typebox-wrap:before { left:12px; font-size:18px; }
+  .app.mobile-game-active .type-help { font-size:9px; line-height:1.1; max-width:none; text-align:center; }
+  .app.mobile-game-active .keyboard-mode-btn { min-height:30px; margin-top:3px; padding:3px 8px; font-size:10px; }
+  .app.mobile-game-active .touch-keyboard.active { flex:0 0 auto; gap:4px; padding:4px 5px 5px; }
+  .app.mobile-game-active .virtual-key { min-height:39px; border-radius:6px; font-size:15px; }
+  .app.mobile-game-active .virtual-key.special { min-height:34px; }
+  .app.mobile-game-active .below-field { flex:0 0 auto; padding:2px 9px 4px; font-size:10px; }
+  .app.mobile-game-active .pace-bar { width:44px; }
+  .app.mobile-game-active .game-bottom { display:none; }
+  .app.mobile-game-active .overlay { padding:10px; }
+  .app.mobile-game-active .overlay-card { max-height:95%; overflow-y:auto; padding:18px 16px; }
+  .app.mobile-game-active .overlay-card h3 { font-size:23px; }
+  .app.mobile-game-active .overlay-card p { font-size:13px; margin-bottom:12px; }
+  @media (max-width:420px) {
+    .app.mobile-game-active .game-head { flex-wrap:wrap; }
+    .app.mobile-game-active .mission { flex:1 1 125px; }
+    .app.mobile-game-active .game-actions { flex:0 0 auto; }
+    .app.mobile-game-active .game-actions .btn { padding:4px 5px; font-size:9px; }
+    .app.mobile-game-active .stat .value { font-size:12px; }
+    .app.mobile-game-active .virtual-key { min-height:38px; }
+  }
+  @media (max-height:700px) and (max-width:820px) {
+    .app.mobile-game-active .below-field { display:none; }
+    .app.mobile-game-active .touch-keyboard.active { gap:3px; padding-top:3px; padding-bottom:calc(3px + env(safe-area-inset-bottom)); }
+    .app.mobile-game-active .virtual-key { min-height:32px; }
+    .app.mobile-game-active .virtual-key.special { min-height:29px; }
+    .app.mobile-game-active .type-help { display:none; }
+    .app.mobile-game-active #typingInput { height:38px; }
+    .app.mobile-game-active .hud { padding-top:3px; padding-bottom:4px; }
+  }
+  @media (orientation:landscape) and (max-height:500px) and (max-width:900px) {
+    .app.mobile-game-active .game-head { padding:3px 6px; }
+    .app.mobile-game-active .mission-icon { width:28px; height:28px; }
+    .app.mobile-game-active .hud { grid-template-columns:repeat(5,minmax(0,1fr)); padding:2px 5px 4px; }
+    .app.mobile-game-active .stat { padding:3px; }
+    .app.mobile-game-active .field-wrap { padding-bottom:3px; }
+    .app.mobile-game-active .touch-keyboard.active { display:flex; flex-wrap:wrap; justify-content:center; gap:3px; padding:3px 4px; }
+    .app.mobile-game-active .key-row { width:100%; gap:3px; }
+    .app.mobile-game-active .virtual-key { min-height:27px; padding:0; font-size:12px; }
+    .app.mobile-game-active .virtual-key.special { min-height:26px; }
+    .app.mobile-game-active .type-panel { padding:2px 5px; }
+    .app.mobile-game-active #typingInput { height:32px; }
+    .app.mobile-game-active .overlay-card { padding:10px; }
+    .app.mobile-game-active .overlay-emoji { font-size:30px; }
+    .app.mobile-game-active .overlay-card h3 { margin:4px 0; font-size:20px; }
+    .app.mobile-game-active .overlay-card p { margin-bottom:7px; font-size:11px; }
+  }
   @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important; } }
 </style>
 </head>
 <body>
-<div class="app">
+<div id="appRoot" class="app">
   <header class="topbar">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">⌨️</div>
@@ -247,8 +339,14 @@
         </div>
       </div>
       <div class="type-panel">
-        <div class="typebox-wrap"><label class="screen-reader" for="typingInput">Type the falling target here</label><input id="typingInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Click here, then type the target…" aria-describedby="typeHelp"></div>
-        <div id="typeHelp" class="type-help">Letters pop one at a time. For words and phrases, type the whole target.</div>
+        <div class="typebox-wrap"><label class="screen-reader" for="typingInput">Type the falling target here</label><input id="typingInput" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="Click here, then type the target…" aria-describedby="typeHelp"></div>
+        <div id="typeHelp" class="type-help">Letters pop one at a time. For words and phrases, type the whole target. <button id="deviceKeyboardBtn" class="btn small keyboard-mode-btn" type="button" hidden>Use device keyboard</button></div>
+      </div>
+      <div id="touchKeyboard" class="touch-keyboard" role="group" aria-label="On-screen typing keyboard">
+        <div class="key-row"><button class="virtual-key" data-vkey="q" type="button">q</button><button class="virtual-key" data-vkey="w" type="button">w</button><button class="virtual-key" data-vkey="e" type="button">e</button><button class="virtual-key" data-vkey="r" type="button">r</button><button class="virtual-key" data-vkey="t" type="button">t</button><button class="virtual-key" data-vkey="y" type="button">y</button><button class="virtual-key" data-vkey="u" type="button">u</button><button class="virtual-key" data-vkey="i" type="button">i</button><button class="virtual-key" data-vkey="o" type="button">o</button><button class="virtual-key" data-vkey="p" type="button">p</button></div>
+        <div class="key-row middle"><button class="virtual-key" data-vkey="a" type="button">a</button><button class="virtual-key" data-vkey="s" type="button">s</button><button class="virtual-key" data-vkey="d" type="button">d</button><button class="virtual-key" data-vkey="f" type="button">f</button><button class="virtual-key" data-vkey="g" type="button">g</button><button class="virtual-key" data-vkey="h" type="button">h</button><button class="virtual-key" data-vkey="j" type="button">j</button><button class="virtual-key" data-vkey="k" type="button">k</button><button class="virtual-key" data-vkey="l" type="button">l</button></div>
+        <div class="key-row bottom-row"><button class="virtual-key" data-vkey="z" type="button">z</button><button class="virtual-key" data-vkey="x" type="button">x</button><button class="virtual-key" data-vkey="c" type="button">c</button><button class="virtual-key" data-vkey="v" type="button">v</button><button class="virtual-key" data-vkey="b" type="button">b</button><button class="virtual-key" data-vkey="n" type="button">n</button><button class="virtual-key" data-vkey="m" type="button">m</button></div>
+        <div class="key-row special-row"><button class="virtual-key special" data-vkey="space" type="button">Space</button><button class="virtual-key special" data-vkey="backspace" type="button" aria-label="Backspace">⌫</button><button class="virtual-key special clear-key" data-vkey="clear" type="button">Clear</button></div>
       </div>
       <div class="below-field"><div class="pace"><strong style="color:#cee4f3">Falling speed</strong><span id="paceText">Chill</span><span class="pace-bar"><span id="paceFill"></span></span></div><div id="nextReward">Next star: save 5 threats ⭐</div></div>
       <div class="game-bottom"><div class="legend"><span>❄️ Snowball = letter</span><span>🚀 Rocket = word</span><span>🛸 UFO = phrase</span></div><div>Every 5 saves earns a star. Every 5-hit streak earns a bonus!</div></div>
@@ -281,6 +379,23 @@
   const playfield = $('playfield');
   const typingInput = $('typingInput');
   const overlay = $('overlay');
+  const appRoot = $('appRoot');
+  const touchKeyboard = $('touchKeyboard');
+  const deviceKeyboardBtn = $('deviceKeyboardBtn');
+  const touchCapable = (navigator.maxTouchPoints || 0) > 0 || ('ontouchstart' in window) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  let useDeviceKeyboard = !touchCapable;
+  function updateInputMode() {
+    const useTouchKeys = touchCapable && !useDeviceKeyboard;
+    typingInput.readOnly = useTouchKeys;
+    touchKeyboard.classList.toggle('active', useTouchKeys);
+    deviceKeyboardBtn.hidden = !touchCapable;
+    deviceKeyboardBtn.textContent = useTouchKeys ? 'Use device keyboard' : 'Use touch keys';
+    const spaceKey = touchKeyboard.querySelector('[data-vkey="space"]');
+    if (spaceKey) spaceKey.disabled = state.mode !== 'phrase';
+    const mobileFullscreen = useTouchKeys && views.game.classList.contains('active');
+    appRoot.classList.toggle('mobile-game-active', mobileFullscreen);
+    document.body.classList.toggle('mobile-game-active', mobileFullscreen);
+  }
   const modeConfig = {
     letter: { name:'Snowballville', icon:'❄️', subtitle:'Type the letter to pop the snowball.', kind:'letter', baseSpeed:21, spawnMs:1600, points:10, maxThreats:7,
       words: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') },
@@ -302,7 +417,8 @@
   function showView(which) {
     Object.entries(views).forEach(([k, el]) => el.classList.toggle('active', k === which));
     $('homeBtn').hidden = which === 'home';
-    window.scrollTo({top:0,behavior:'smooth'});
+    updateInputMode();
+    if (!appRoot.classList.contains('mobile-game-active')) window.scrollTo({top:0,behavior:'auto'});
   }
   function initAudio() {
     if (!state.audio) {
@@ -359,7 +475,7 @@
   function beginRun() {
     initAudio(); hideOverlay(); state.running=true; state.paused=false; state.lastTime=performance.now(); state.spawnElapsed=0;
     typingInput.value=''; state.typed=''; typingInput.placeholder=state.mode==='letter'?'Type a letter…':state.mode==='word'?'Type a rocket word…':'Type the UFO phrase…';
-    typingInput.focus({preventScroll:true}); state.raf=requestAnimationFrame(tick);
+    if (!typingInput.readOnly) typingInput.focus({preventScroll:true}); state.raf=requestAnimationFrame(tick);
     spawnThreat();
   }
   function pauseGame() {
@@ -367,11 +483,11 @@
     if (!state.paused) {
       state.paused=true; state.running=false; cancelAnimationFrame(state.raf);
       setOverlay('Mission paused', 'Take a breath. Your village and your progress are safe. Ready when you are!', '⏸️', 'Resume mission', () => {
-        hideOverlay(); state.paused=false; state.running=true; state.lastTime=performance.now(); state.raf=requestAnimationFrame(tick); typingInput.focus({preventScroll:true}); $('pauseBtn').textContent='Ⅱ Pause';
+        hideOverlay(); state.paused=false; state.running=true; state.lastTime=performance.now(); state.raf=requestAnimationFrame(tick); if (!typingInput.readOnly) typingInput.focus({preventScroll:true}); $('pauseBtn').textContent='Ⅱ Pause';
       });
       $('pauseBtn').textContent='▶ Resume';
     } else {
-      state.paused=false; state.running=true; hideOverlay(); state.lastTime=performance.now(); state.raf=requestAnimationFrame(tick); typingInput.focus({preventScroll:true}); $('pauseBtn').textContent='Ⅱ Pause';
+      state.paused=false; state.running=true; hideOverlay(); state.lastTime=performance.now(); state.raf=requestAnimationFrame(tick); if (!typingInput.readOnly) typingInput.focus({preventScroll:true}); $('pauseBtn').textContent='Ⅱ Pause';
     }
   }
   function quitToHome() {
@@ -549,7 +665,43 @@
   }
 
   $('typingInput').addEventListener('input',()=>handleTyping(typingInput.value));
-  // Reset on explicit backspace/escape even if some mobile keyboards do not emit an input event for a clearing action.
+  function pressVirtualKey(key) {
+    if (!state.running || state.paused || state.ended || !state.mode) return;
+    if (key === 'space') {
+      if (state.mode !== 'phrase') return;
+      typingInput.value = state.typed + ' ';
+      handleTyping(typingInput.value);
+      return;
+    }
+    if (key === 'backspace') {
+      if (state.mode === 'letter') return;
+      typingInput.value = state.typed.slice(0, -1);
+      handleTyping(typingInput.value);
+      return;
+    }
+    if (key === 'clear') {
+      typingInput.value = ''; state.typed = ''; state.lockedId = null; refreshTargetHighlight();
+      return;
+    }
+    if (/^[a-z]$/.test(key)) {
+      typingInput.value = state.mode === 'letter' ? key : state.typed + key;
+      handleTyping(typingInput.value);
+    }
+  }
+  touchKeyboard.querySelectorAll('[data-vkey]').forEach(btn => {
+    btn.addEventListener('click', () => pressVirtualKey(btn.dataset.vkey));
+  });
+  deviceKeyboardBtn.addEventListener('click', () => {
+    useDeviceKeyboard = !useDeviceKeyboard;
+    updateInputMode();
+    if (useDeviceKeyboard) {
+      typingInput.focus({preventScroll:true});
+    } else {
+      typingInput.blur();
+    }
+  });
+  updateInputMode();
+  // Reset on explicit backspace/escape even if some device keyboards do not emit an input event for a clearing action.
   typingInput.addEventListener('keydown',(e)=>{
     if (e.key==='Escape') { e.preventDefault();typingInput.value='';state.typed='';state.lockedId=null;refreshTargetHighlight(); }
   });
@@ -563,6 +715,14 @@
   $('againBtn').addEventListener('click',()=>startMode(state.mode));
   document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>startMode(btn.dataset.mode)));
   document.addEventListener('visibilitychange',()=>{ if(document.hidden && state.running) pauseGame(); });
+  window.addEventListener('resize', () => {
+    if (!playfield.clientWidth) return;
+    state.threats.forEach(t => {
+      if (t.dead) return;
+      t.x = Math.max(5, Math.min(t.x, playfield.clientWidth - t.w - 5));
+      t.el.style.left = `${t.x}px`;
+    });
+  }, {passive:true});
   setSound(true);
 })();
 </script>
