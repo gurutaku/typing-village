@@ -201,7 +201,7 @@
         <h2 id="heroTitle">Ready, set, <span>type!</span></h2>
         <p class="lead">Friendly snowballs, word rockets, and phrase UFOs are drifting toward the village. Type what you see to turn every threat into sparkles before it reaches the ground!</p>
         <div class="howto">
-          <span class="how-chip">⌨️ Type the target</span><span class="how-chip">⭐ Earn stars and streaks</span><span class="how-chip">🛡️ Protect 3 village shields</span><span class="how-chip">📚 2,000 short words · live phrases</span>
+          <span class="how-chip">⌨️ Type the target</span><span class="how-chip">⭐ Earn stars and streaks</span><span class="how-chip">🛡️ Protect 3 village shields</span><span class="how-chip">📚 2,000 short words · 100 silly phrases</span>
         </div>
       </div>
       <div class="mode-heading"><div><h3>Choose your mission</h3><p>Start easy, then challenge your typing skills.</p></div></div>
@@ -265,8 +265,17 @@
 </div>
 <script src="./kid-words.js"></script>
 <script>
-(() => {
+(async () => {
   'use strict';
+  let wordData = null;
+  try {
+    const response = await fetch('./kid-words.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Vocabulary JSON request failed');
+    wordData = await response.json();
+  } catch (_) {
+    // file:// pages cannot fetch JSON in many browsers; use the synchronized JS fallback.
+    wordData = window.VILLAGE_WORD_DATA || null;
+  }
   const $ = (id) => document.getElementById(id);
   const views = { home: $('homeView'), game: $('gameView'), results: $('resultsView') };
   const playfield = $('playfield');
@@ -276,13 +285,13 @@
     letter: { name:'Snowballville', icon:'❄️', subtitle:'Type the letter to pop the snowball.', kind:'letter', baseSpeed:21, spawnMs:1600, points:10, maxThreats:7,
       words: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') },
     word: { name:'War Zone', icon:'🚀', subtitle:'Type a short word to reroute the rocket.', kind:'word', baseSpeed:19, spawnMs:2050, points:25, maxThreats:5 },
-    phrase: { name:'Planet Crisis', icon:'🛸', subtitle:'Type a new phrase built live from the kid word bank.', kind:'phrase', baseSpeed:17, spawnMs:2550, points:50, maxThreats:4 },
+    phrase: { name:'Planet Crisis', icon:'🛸', subtitle:'Type one of 100 silly phrases from the kid word bank.', kind:'phrase', baseSpeed:17, spawnMs:2550, points:50, maxThreats:4 },
   };
   const state = {
     mode:null, running:false, paused:false, ended:false, threats:[], nextId:1,
     score:0, saved:0, misses:0, lives:3, streak:0, bestStreak:0, stars:0,
     typed:'', lockedId:null, elapsed:0, spawnElapsed:0, lastTime:0, raf:0,
-    sound:true, audio:null, toastTimer:0, lastLane:null, modeStartTime:0, recentPhrases:[], recentPhrases:[], recentPhrases:[], recentPhrases:[], recentPhrases:[]
+    sound:true, audio:null, toastTimer:0, lastLane:null, modeStartTime:0, phraseDeck:[], lastPhrase:''
   };
   const bestKey = (mode) => `villageTypingBest_${mode}`;
   function getBest(mode) { try { return Number(localStorage.getItem(bestKey(mode)) || 0); } catch (_) { return 0; } }
@@ -332,17 +341,17 @@
   function hideOverlay() { overlay.classList.add('hidden'); }
   function clearThreatElements() { state.threats.forEach(t=>t.el.remove()); state.threats=[]; }
   function startMode(mode) {
-    if (mode!=='letter' && (!wordData || !Array.isArray(wordData.words) || wordData.words.length!==2000 || !wordData.parts)) {
-      alert('The external kid-words.js vocabulary file is missing or incomplete. Keep it next to index.html and try again.'); return;
+    if (mode!=='letter' && (!wordData || !Array.isArray(wordData.words) || wordData.words.length!==2000 || !wordData.parts || (mode==='phrase' && (!Array.isArray(wordData.phrases) || wordData.phrases.length!==100)))) {
+      alert('The external kid-words.json data file is missing or incomplete. Keep kid-words.json next to index.html and try again.'); return;
     }
     initAudio();
     state.mode = mode; state.running=false; state.paused=false; state.ended=false;
     state.score=0; state.saved=0; state.misses=0; state.lives=3; state.streak=0; state.bestStreak=0; state.stars=0;
-    state.typed=''; state.lockedId=null; state.elapsed=0; state.spawnElapsed=0; state.lastTime=0; state.lastLane=null; state.recentPhrases=[]; state.modeStartTime=performance.now();
+    state.typed=''; state.lockedId=null; state.elapsed=0; state.spawnElapsed=0; state.lastTime=0; state.lastLane=null; state.phraseDeck=[]; state.lastPhrase=''; state.modeStartTime=performance.now();
     clearThreatElements(); typingInput.value='';
     const cfg=modeConfig[mode];
     $('missionIcon').textContent=cfg.icon; $('missionTitle').textContent=cfg.name; $('missionSubtitle').textContent=cfg.subtitle; $('pauseBtn').textContent='Ⅱ Pause';
-    $('typeHelp').textContent = mode==='letter' ? 'Type any letter on a snowball. One key = one save.' : mode==='word' ? 'Type the whole word shown on a rocket. The word bank favors familiar short words.' : 'Type the whole live-generated phrase, including spaces, to guide the UFO away.';
+    $('typeHelp').textContent = mode==='letter' ? 'Type any letter on a snowball. One key = one save.' : mode==='word' ? 'Type the whole word shown on a rocket. The word bank favors familiar short words.' : 'Type the whole silly phrase, including spaces, to guide the UFO away.';
     $('paceText').textContent='Chill'; $('paceFill').style.width='0%'; $('nextReward').textContent='Next star: save 5 threats ⭐';
     updateHud(); showView('game');
     setOverlay('Ready, defender?', 'Type the characters on the falling targets. Keep them away from the village floor — each miss costs one shield.', cfg.icon, 'Start mission', beginRun);
@@ -369,10 +378,6 @@
     state.running=false;state.paused=false;state.ended=true;cancelAnimationFrame(state.raf);clearThreatElements();hideOverlay();
     state.mode=null;typingInput.value='';showView('home');renderBests();
   }
-  const wordData = window.VILLAGE_WORD_DATA || null;
-  const phraseParts = wordData && wordData.parts ? wordData.parts : {};
-  const choose = (pool, fallback='the') => pool && pool.length ? pool[Math.floor(Math.random()*pool.length)] : fallback;
-  const partsWords = new Set(wordData && Array.isArray(wordData.words) ? wordData.words.map(x=>typeof x==='string'?x:x.word) : []);
   const stopTargetWords = new Set(('the and for that with from this your our his her its was were are is be can will may did has had have you they she he we it one two all any not but who what when then now out off over into onto such than more less us me him').split(' '));
   const targetWordPool = wordData && Array.isArray(wordData.words) ? wordData.words
     .map(x=>typeof x==='string'?{word:x,freq:1}:x)
@@ -385,62 +390,29 @@
     for(let i=0;i<targetWordPool.length;i++){r-=weights[i];if(r<=0)return targetWordPool[i].word;}
     return targetWordPool[targetWordPool.length-1].word;
   }
-  function generatePhrase() {
-    const p=phraseParts;
-    const creature=()=>choose(p.creatures,'cat');
-    const thing=()=>choose(p.things,'kite');
-    const place=()=>choose(p.places,'park');
-    const verb=()=>choose(p.verbs,'hop');
-    const adj=()=>choose(p.adjectives,'kind');
-    const det=()=>choose((p.determiners||[]).filter(w=>!['a','its','some','all'].includes(w)),'the');
-    const pron=()=>choose((p.pronouns||[]).filter(w=>['we','you','i','he','she','they'].includes(w)),'we');
-    const prep=()=>choose((p.prepositions||[]).filter(w=>['at','in','on','by','to','with','near','over','for'].includes(w)),'with');
-    const adv=()=>choose(p.adverbs,'well');
-    const articleNoun=()=>choose(p.articleNouns,'cat');
-    // Phrases are assembled at spawn time from categorized words in the external bank.
-    const templates=[
-      ()=>`the ${adj()} ${creature()} can ${verb()}`,
-      ()=>`${pron()} can ${verb()} with ${det()} ${creature()}`,
-      ()=>`the ${creature()} is ${adj()}`,
-      ()=>`see the ${adj()} ${thing()}`,
-      ()=>`let us ${verb()} and ${verb()}`,
-      ()=>`${det()} ${creature()} can ${verb()}`,
-      ()=>`we ${verb()} with the ${creature()}`,
-      ()=>`the ${creature()} can ${verb()} ${adv()}`,
-      ()=>`${adj()} ${creature()} can ${verb()}`,
-      ()=>`the ${creature()} and the ${creature()} can ${verb()}`,
-      ()=>`look at the ${thing()}`,
-      ()=>`you can ${verb()} ${prep()} the ${place()}`,
-      ()=>`${pron()} can ${verb()} and ${verb()}`,
-      ()=>`the ${creature()} is ${adj()} and ${adj()}`,
-      ()=>`we can ${verb()} in the ${place()}`,
-      ()=>`help the ${creature()} ${verb()}`,
-      ()=>`the ${adj()} ${thing()} is here`,
-      ()=>`${creature()} and ${creature()} can ${verb()}`,
-      ()=>`we can ${verb()} now`,
-      ()=>`the ${creature()} has a ${articleNoun()}`,
-      ()=>`a ${articleNoun()} can ${verb()}`,
-      ()=>`my ${creature()} is ${adj()}`,
-      ()=>`you and i can ${verb()}`,
-      ()=>`the ${thing()} is ${prep()} the ${thing()}`,
-      ()=>`the ${place()} is ${adj()}`
-    ];
-    let phrase='';
-    for(let i=0;i<12;i++){
-      phrase=templates[Math.floor(Math.random()*templates.length)]().toLowerCase().replace(/\s+/g,' ').trim();
-      if(phrase.length<=34 && phrase.split(' ').every(w=>partsWords.has(w))) break;
+  function pickPhrase() {
+    const phrases = wordData && Array.isArray(wordData.phrases) ? wordData.phrases : [];
+    if (!phrases.length) return 'the cat ate my hat';
+    if (!state.phraseDeck.length) {
+      state.phraseDeck = phrases.slice();
+      for (let i = state.phraseDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [state.phraseDeck[i], state.phraseDeck[j]] = [state.phraseDeck[j], state.phraseDeck[i]];
+      }
+      // Avoid repeating the last phrase when a fresh shuffled deck begins.
+      if (state.phraseDeck.length > 1 && state.phraseDeck[state.phraseDeck.length - 1] === state.lastPhrase) {
+        [state.phraseDeck[0], state.phraseDeck[state.phraseDeck.length - 1]] = [state.phraseDeck[state.phraseDeck.length - 1], state.phraseDeck[0]];
+      }
     }
-    return phrase && phrase.split(' ').every(w=>partsWords.has(w)) ? phrase : 'the kind cat can hop';
+    const phrase = state.phraseDeck.pop();
+    state.lastPhrase = phrase;
+    return phrase;
   }
   function getThreatLabel() {
     const cfg=modeConfig[state.mode];
     if (cfg.kind==='letter') return cfg.words[Math.floor(Math.random()*cfg.words.length)];
     if (cfg.kind==='word') return pickMissileWord();
-    const recent=state.recentPhrases || (state.recentPhrases=[]);
-    let phrase=generatePhrase(); let tries=0;
-    while(recent.includes(phrase) && tries++<8) phrase=generatePhrase();
-    recent.push(phrase); if(recent.length>24)recent.shift();
-    return phrase;
+    return pickPhrase();
   }
   function threatWidth(kind) { return kind==='letter' ? 66 : kind==='word' ? 154 : Math.min(242, Math.max(190, playfield.clientWidth*.29)); }
   function spawnThreat() {
