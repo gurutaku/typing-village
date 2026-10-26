@@ -234,6 +234,11 @@
   .app.mobile-game-active .toast { bottom:4px; max-width:calc(100% - 14px); padding:7px 10px; font-size:11px; line-height:1.2; }
   .app.mobile-game-active .village { bottom:17px; }
   .app.mobile-game-active .house { font-size:23px; }
+  /* Keep phrase UFOs compact on touch screens so more of the village stays visible. */
+  .app.mobile-game-active .threat.phrase { min-height:54px; padding:6px 7px 6px 27px; border-radius:48% 48% 42% 42% / 36% 36% 64% 64%; box-shadow:inset 0 -6px 0 #8063cb44,0 4px 0 #58469b44; }
+  .app.mobile-game-active .threat.phrase:before { left:-7px; top:7px; font-size:21px; }
+  .app.mobile-game-active .threat.phrase:after { bottom:-7px; left:22%; width:12px; height:8px; box-shadow:22px 3px #d6b6ff,44px 0 #a5ffde; }
+  .app.mobile-game-active .threat.phrase .label { font-size:clamp(9px,2.7vw,11px); line-height:1.12; }
   .app.mobile-game-active .type-panel { flex:0 0 auto; grid-template-columns:minmax(0,1fr); gap:3px; padding:3px 7px 4px; }
   .app.mobile-game-active #typingInput { height:42px; padding-left:40px; border-radius:10px; font-size:16px; }
   .app.mobile-game-active .typebox-wrap:before { left:12px; font-size:18px; }
@@ -556,24 +561,51 @@
     if (cfg.kind==='word') return pickMissileWord();
     return pickPhrase();
   }
-  function threatWidth(kind) { return kind==='letter' ? 66 : kind==='word' ? 154 : Math.min(242, Math.max(190, playfield.clientWidth*.29)); }
+  function threatWidth(kind) {
+    if (kind==='letter') return 66;
+    if (kind==='word') return 154;
+    const fieldWidth=playfield.clientWidth;
+    // Narrow screens use noticeably smaller UFOs; tablets get a moderate size,
+    // while desktop keeps the original larger targets.
+    if (fieldWidth <= 420) return Math.min(168, Math.max(132, fieldWidth*.43));
+    if (fieldWidth <= 520) return Math.min(182, Math.max(154, fieldWidth*.36));
+    if (appRoot.classList.contains('mobile-game-active')) return Math.min(196, Math.max(170, fieldWidth*.26));
+    return Math.min(242, Math.max(190, fieldWidth*.29));
+  }
   function spawnThreat() {
     if (!state.running || !state.mode) return;
     const cfg=modeConfig[state.mode];
     if (state.threats.filter(t=>!t.dead).length >= cfg.maxThreats) return;
     const label=getThreatLabel(); const kind=cfg.kind; const w=threatWidth(kind);
-    const margin=8; let x=margin+Math.random()*Math.max(1,playfield.clientWidth-w-margin*2);
-    // Keep nearby targets apart so the labels stay readable.
-    for (let tries=0;tries<10;tries++) {
-      const overlaps=state.threats.some(t=>!t.dead && Math.abs((t.x+t.w/2)-(x+w/2)) < (t.w+w)/2+15 && Math.abs(t.y-(-40))<115);
-      if (!overlaps) break;
-      x=margin+Math.random()*Math.max(1,playfield.clientWidth-w-margin*2);
+    const margin=8, spawnY=-80;
+    const spawnH=kind==='letter'?66:kind==='word'?51:(playfield.clientWidth<=520?60:68);
+    const maxX=Math.max(margin,playfield.clientWidth-w-margin);
+    // Search the full usable width and only spawn where the whole target has
+    // clearance from existing threats. If no safe slot is available, skip this
+    // spawn tick rather than drawing an overlapping UFO on small screens.
+    const candidates=[];
+    for (let i=0;i<70;i++) candidates.push(margin+Math.random()*Math.max(0,maxX-margin));
+    for (let x=margin;x<=maxX;x+=6) candidates.push(x);
+    candidates.push(maxX);
+    let x=null;
+    for (const candidate of candidates) {
+      const overlaps=state.threats.some(t=>{
+        if (t.dead) return false;
+        const horizontalOverlap = candidate < t.x+t.w+12 && candidate+w+12 > t.x;
+        const verticalOverlap = spawnY < t.y+t.h+10 && spawnY+spawnH+10 > t.y;
+        return horizontalOverlap && verticalOverlap;
+      });
+      if (!overlaps) { x=candidate; break; }
     }
-    const el=document.createElement('div'); el.className=`threat ${kind}`; if (kind==='word' || kind==='phrase') el.style.width=`${w}px`; el.style.left=`${Math.max(margin,Math.min(x,playfield.clientWidth-w-margin))}px`; el.style.top='-80px';
+    if (x===null) return;
+    x=Math.max(margin,Math.min(x,maxX));
+    const el=document.createElement('div'); el.className=`threat ${kind}`; if (kind==='word' || kind==='phrase') el.style.width=`${w}px`; el.style.left=`${x}px`; el.style.top=`${spawnY}px`;
     const labelEl=document.createElement('span'); labelEl.className='label'; labelEl.textContent=label; el.appendChild(labelEl);
     el.setAttribute('aria-label', `${kind==='letter'?'Letter':kind==='word'?'Word':'Phrase'} target: ${label}`);
     playfield.appendChild(el);
-    const threat={id:state.nextId++,label,kind,x:parseFloat(el.style.left),y:-80,w,h:kind==='letter'?66:kind==='word'?51:68,el,labelEl,dead:false};
+    const threat={id:state.nextId++,label,kind,x:parseFloat(el.style.left),y:spawnY,w,h:kind==='letter'?66:kind==='word'?51:68,el,labelEl,dead:false};
+    // Measure the wrapped phrase height so later spawn checks use its real bounds.
+    threat.h=el.offsetHeight || threat.h;
     state.threats.push(threat);
     if (state.typed) refreshTargetHighlight();
   }
@@ -681,7 +713,15 @@
   }
   function missThreat(t) {
     if (t.dead) return;
-    t.dead=true; t.el.remove(); state.misses++;state.lives=Math.max(0,state.lives-1);state.streak=0;state.typed='';state.lockedId=null;typingInput.value='';
+    // Only clear typing progress if the threat the player is working on is the one
+    // that reached the floor. Another missed threat must not erase their current word/phrase.
+    const wasActiveTypingTarget = state.lockedId === t.id;
+    t.dead=true; t.el.remove(); state.misses++;state.lives=Math.max(0,state.lives-1);state.streak=0;
+    if (wasActiveTypingTarget) {
+      state.typed='';
+      state.lockedId=null;
+      typingInput.value='';
+    }
     missSound();showToast('💨 Missed! One village shield lost');updateHud();refreshTargetHighlight();
     if (state.lives<=0) endGame(false);
   }
