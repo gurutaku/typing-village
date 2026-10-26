@@ -25,3 +25,7 @@ Mobile UFO layout update
 - Phrase UFOs are smaller on phone-sized playfields and moderately smaller on tablets.
 - UFO spawns now check actual horizontal and vertical space before appearing; if there is no safe slot, that spawn is skipped rather than allowing targets to overlap.
 - Wrapped phrase height is measured for subsequent spawn-spacing checks.
+
+Header link
+- A 🎮 More Games link sits directly to the right of Sound on/off and returns to https://gurutaku.ca/coolgames/.
+- The link uses responsive styling for phone and tablet widths.
