@@ -201,6 +201,11 @@
   .key-row.bottom-row { padding-inline:13%; }
   .virtual-key.special { flex:1.3 1 0; font-size:13px; text-transform:none; }
   .virtual-key.special[data-vkey="backspace"] { flex:.7 1 0; font-size:22px; }
+  /* Familiar bottom row: clear on the left, a wide centered spacebar, delete on the right. */
+  .special-row { align-items:stretch; }
+  .special-row .clear-key { flex:1.15 1 0; }
+  .special-row .space-key { flex:4.2 1 0; min-width:0; letter-spacing:.04em; font-size:12px; }
+  .special-row .delete-key { flex:1.05 1 0; font-size:22px; }
   .virtual-key:disabled { opacity:.35; box-shadow:none; }
   .app.mobile-game-active { position:fixed; z-index:100; inset:0; width:100%; max-width:none; height:100vh; height:100dvh; margin:0; overflow:hidden; padding:calc(5px + env(safe-area-inset-top)) 7px calc(4px + env(safe-area-inset-bottom)); }
   body.mobile-game-active { overflow:hidden; }
@@ -240,10 +245,19 @@
   .app.mobile-game-active .below-field { flex:0 0 auto; padding:2px 9px 4px; font-size:10px; }
   .app.mobile-game-active .pace-bar { width:44px; }
   .app.mobile-game-active .game-bottom { display:none; }
-  .app.mobile-game-active .overlay { padding:10px; }
-  .app.mobile-game-active .overlay-card { max-height:95%; overflow-y:auto; padding:18px 16px; }
-  .app.mobile-game-active .overlay-card h3 { font-size:23px; }
-  .app.mobile-game-active .overlay-card p { font-size:13px; margin-bottom:12px; }
+  .app.mobile-game-active .overlay { padding:8px; }
+  /* Expand the playfield while an overlay is open by hiding controls behind it. This gives the Ready card room to fit without scrolling. */
+  .app.mobile-game-active.overlay-open .type-panel,
+  .app.mobile-game-active.overlay-open .touch-keyboard,
+  .app.mobile-game-active.overlay-open .below-field { display:none !important; }
+  .app.mobile-game-active.overlay-open .overlay-card {
+    max-height:calc(100% - 2px); overflow:hidden; padding:clamp(9px,2.2dvh,16px) 14px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;
+  }
+  .app.mobile-game-active.overlay-open .overlay-emoji { font-size:clamp(28px,5.2dvh,38px); line-height:1; }
+  .app.mobile-game-active.overlay-open .overlay-card h3 { margin:7px 0 5px; font-size:clamp(19px,3.3dvh,23px); line-height:1.12; }
+  .app.mobile-game-active.overlay-open .overlay-card p { max-width:34em; margin:0 auto 9px; font-size:clamp(11px,1.85dvh,13px); line-height:1.35; }
+  .app.mobile-game-active.overlay-open .overlay-card .btn { flex:0 0 auto; min-height:40px; padding:8px 14px; }
   @media (max-width:420px) {
     .app.mobile-game-active .game-head { flex-wrap:wrap; }
     .app.mobile-game-active .mission { flex:1 1 125px; }
@@ -271,12 +285,16 @@
     .app.mobile-game-active .key-row { width:100%; gap:3px; }
     .app.mobile-game-active .virtual-key { min-height:27px; padding:0; font-size:12px; }
     .app.mobile-game-active .virtual-key.special { min-height:26px; }
+    .app.mobile-game-active .special-row .space-key { font-size:11px; }
+    .app.mobile-game-active .special-row .delete-key { font-size:18px; }
     .app.mobile-game-active .type-panel { padding:2px 5px; }
     .app.mobile-game-active #typingInput { height:32px; }
-    .app.mobile-game-active .overlay-card { padding:10px; }
-    .app.mobile-game-active .overlay-emoji { font-size:30px; }
-    .app.mobile-game-active .overlay-card h3 { margin:4px 0; font-size:20px; }
-    .app.mobile-game-active .overlay-card p { margin-bottom:7px; font-size:11px; }
+    .app.mobile-game-active.overlay-open .overlay { padding:5px; }
+    .app.mobile-game-active.overlay-open .overlay-card { padding:7px 10px; }
+    .app.mobile-game-active.overlay-open .overlay-emoji { font-size:27px; }
+    .app.mobile-game-active.overlay-open .overlay-card h3 { margin:4px 0; font-size:19px; }
+    .app.mobile-game-active.overlay-open .overlay-card p { margin-bottom:6px; font-size:10px; line-height:1.25; }
+    .app.mobile-game-active.overlay-open .overlay-card .btn { min-height:36px; padding:6px 12px; }
   }
   @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important; } }
 </style>
@@ -354,7 +372,7 @@
         <div class="key-row"><button class="virtual-key" data-vkey="q" type="button">q</button><button class="virtual-key" data-vkey="w" type="button">w</button><button class="virtual-key" data-vkey="e" type="button">e</button><button class="virtual-key" data-vkey="r" type="button">r</button><button class="virtual-key" data-vkey="t" type="button">t</button><button class="virtual-key" data-vkey="y" type="button">y</button><button class="virtual-key" data-vkey="u" type="button">u</button><button class="virtual-key" data-vkey="i" type="button">i</button><button class="virtual-key" data-vkey="o" type="button">o</button><button class="virtual-key" data-vkey="p" type="button">p</button></div>
         <div class="key-row middle"><button class="virtual-key" data-vkey="a" type="button">a</button><button class="virtual-key" data-vkey="s" type="button">s</button><button class="virtual-key" data-vkey="d" type="button">d</button><button class="virtual-key" data-vkey="f" type="button">f</button><button class="virtual-key" data-vkey="g" type="button">g</button><button class="virtual-key" data-vkey="h" type="button">h</button><button class="virtual-key" data-vkey="j" type="button">j</button><button class="virtual-key" data-vkey="k" type="button">k</button><button class="virtual-key" data-vkey="l" type="button">l</button></div>
         <div class="key-row bottom-row"><button class="virtual-key" data-vkey="z" type="button">z</button><button class="virtual-key" data-vkey="x" type="button">x</button><button class="virtual-key" data-vkey="c" type="button">c</button><button class="virtual-key" data-vkey="v" type="button">v</button><button class="virtual-key" data-vkey="b" type="button">b</button><button class="virtual-key" data-vkey="n" type="button">n</button><button class="virtual-key" data-vkey="m" type="button">m</button></div>
-        <div class="key-row special-row"><button class="virtual-key special" data-vkey="space" type="button">Space</button><button class="virtual-key special" data-vkey="backspace" type="button" aria-label="Backspace">⌫</button><button class="virtual-key special clear-key" data-vkey="clear" type="button">Clear</button></div>
+        <div class="key-row special-row"><button class="virtual-key special clear-key" data-vkey="clear" type="button" aria-label="Clear typed progress">Clear</button><button class="virtual-key special space-key" data-vkey="space" type="button" aria-label="Space">Space</button><button class="virtual-key special delete-key" data-vkey="backspace" type="button" aria-label="Delete last character" title="Delete last character">⌫</button></div>
       </div>
       <div class="below-field"><div class="pace"><strong style="color:#cee4f3">Falling speed</strong><span id="paceText">Chill</span><span class="pace-bar"><span id="paceFill"></span></span></div><div id="nextReward">Next star: save 5 threats ⭐</div></div>
       <div class="game-bottom"><div class="legend"><span>❄️ Snowball = letter</span><span>🚀 Rocket = word</span><span>🛸 UFO = phrase</span></div><div>Every 5 saves earns a star. Every 5-hit streak earns a bonus!</div></div>
@@ -460,9 +478,9 @@
   }
   function setOverlay(title, text, emoji, buttonText, callback) {
     $('overlayTitle').textContent=title; $('overlayText').textContent=text; $('overlayEmoji').textContent=emoji; $('overlayBtn').textContent=buttonText;
-    $('overlayBtn').onclick=callback; overlay.classList.remove('hidden');
+    $('overlayBtn').onclick=callback; overlay.classList.remove('hidden'); appRoot.classList.add('overlay-open');
   }
-  function hideOverlay() { overlay.classList.add('hidden'); }
+  function hideOverlay() { overlay.classList.add('hidden'); appRoot.classList.remove('overlay-open'); }
   function clearThreatElements() { state.threats.forEach(t=>t.el.remove()); state.threats=[]; }
   function startMode(mode) {
     if (mode!=='letter' && (!wordData || !Array.isArray(wordData.words) || wordData.words.length!==2000 || !wordData.parts || (mode==='phrase' && (!Array.isArray(wordData.phrases) || wordData.phrases.length!==100)))) {
