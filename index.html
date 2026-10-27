@@ -333,6 +333,10 @@
     .app.mobile-game-active.overlay-open .overlay-card .btn { min-height:36px; padding:6px 12px; }
   }
   @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important; } }
+  /* Hide the Home button */
+#homeBtn {
+  display: none !important;
+}
 </style>
 </head>
 <body>
@@ -344,6 +348,7 @@
     </div>
     <div class="top-actions">
       <button id="homeSoundBtn" class="btn small" type="button" aria-pressed="true">🔊 Sound on</button>
+      <button id="homeBtn" class="btn small" type="button" hidden>⌂ Home</button>
       <a class="games-hub-link" href="https://gurutaku.ca/coolgames/" aria-label="Back to Gurutaku Cool Games" title="Back to Gurutaku Cool Games"><span aria-hidden="true">🎮</span><span class="games-hub-label">More Games</span></a>
     </div>
   </header>
