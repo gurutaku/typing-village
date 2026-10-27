@@ -51,7 +51,6 @@
 
   function showView(which) {
     Object.entries(views).forEach(([k, el]) => el.classList.toggle('active', k === which));
-    $('homeBtn').hidden = which === 'home';
     updateInputMode();
     if (!appRoot.classList.contains('mobile-game-active')) window.scrollTo({top:0,behavior:'auto'});
   }
@@ -407,7 +406,6 @@
   playfield.addEventListener('pointerdown',(e)=>{ if (state.running && !e.target.closest('button')) typingInput.focus({preventScroll:true}); });
   $('homeSoundBtn').addEventListener('click',()=>{setSound(!state.sound);if(state.sound)initAudio();});
   $('soundBtn').addEventListener('click',()=>{setSound(!state.sound);if(state.sound)initAudio();});
-  $('homeBtn').addEventListener('click',quitToHome);
   $('pauseBtn').addEventListener('click',pauseGame);
   $('quitBtn').addEventListener('click',quitToHome);
   $('resultHomeBtn').addEventListener('click',quitToHome);
