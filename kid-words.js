@@ -18,7 +18,7 @@
   const touchKeyboard = $('touchKeyboard');
   const deviceKeyboardBtn = $('deviceKeyboardBtn');
   const touchCapable = (navigator.maxTouchPoints || 0) > 0 || ('ontouchstart' in window) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
-  let useDeviceKeyboard = !touchCapable;
+  let useDeviceKeyboard = true;
   function updateInputMode() {
     const useTouchKeys = touchCapable && !useDeviceKeyboard;
     typingInput.readOnly = useTouchKeys;
@@ -110,7 +110,7 @@
   function beginRun() {
     initAudio(); hideOverlay(); state.running=true; state.paused=false; state.lastTime=performance.now(); state.spawnElapsed=0;
     typingInput.value=''; state.typed=''; typingInput.placeholder=state.mode==='letter'?'Type a letter…':state.mode==='word'?'Type a rocket word…':'Type the UFO phrase…';
-    if (!typingInput.readOnly) typingInput.focus({preventScroll:true}); state.raf=requestAnimationFrame(tick);
+    typingInput.readOnly = false;typingInput.focus({ preventScroll: true }); state.raf=requestAnimationFrame(tick);
     spawnThreat();
   }
   function pauseGame() {
