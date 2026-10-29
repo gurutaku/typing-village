@@ -19,42 +19,40 @@
   const deviceKeyboardBtn = $('deviceKeyboardBtn');
   const touchCapable = (navigator.maxTouchPoints || 0) > 0 || ('ontouchstart' in window) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
   let useDeviceKeyboard = true;
+  let typingAdjustFrame = 0;
+
   function keepTypingAreaVisible() {
     if (!typingInput || document.activeElement !== typingInput) return;
+    if (typingAdjustFrame) cancelAnimationFrame(typingAdjustFrame);
 
-    requestAnimationFrame(() => {
-      // Position the textbox near the bottom of the visible screen,
-      // just above the native keyboard.
-      typingInput.scrollIntoView({
-        behavior: 'auto',
-        block: 'end',
-        inline: 'nearest'
-      });
+    typingAdjustFrame = requestAnimationFrame(() => {
+      typingAdjustFrame = 0;
 
-      // Correct for mobile browsers where the keyboard resizes
-      // the visual viewport without resizing the layout viewport.
-      requestAnimationFrame(() => {
-        const viewport = window.visualViewport;
-        if (!viewport) return;
+      const viewport = window.visualViewport;
+      const rect = typingInput.getBoundingClientRect();
+      const visibleBottom = viewport
+        ? viewport.offsetTop + viewport.height
+        : window.innerHeight;
 
-        const rect = typingInput.getBoundingClientRect();
-        const visibleBottom = viewport.offsetTop + viewport.height;
-        const margin = 12;
+      // Only scroll if the textbox is clearly covered.
+      const overflow = rect.bottom - (visibleBottom - 12);
 
-        if (rect.bottom > visibleBottom - margin) {
-          window.scrollBy({
-            top: rect.bottom - visibleBottom + margin,
-            behavior: 'auto'
-          });
-        }
-      });
+      if (overflow > 24) {
+        window.scrollBy({
+          top: overflow,
+          behavior: 'auto'
+        });
+      }
     });
   }
 
-  // Reposition when the phone keyboard opens or its visible area changes.
+  // Adjust when the keyboard opens or the textbox receives focus.
+  // Do not listen to visualViewport's scroll event.
   if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', keepTypingAreaVisible);
-    window.visualViewport.addEventListener('scroll', keepTypingAreaVisible);
+    window.visualViewport.addEventListener(
+      'resize',
+      keepTypingAreaVisible
+    );
   }
 
   typingInput.addEventListener('focus', keepTypingAreaVisible);
@@ -398,7 +396,7 @@
     showView('results');
   }
 
-  $('typingInput').addEventListener('input',()=>{handleTyping(typingInput.value);keepTypingAreaVisible();});
+  $('typingInput').addEventListener('input',()=>{handleTyping(typingInput.value);});
   function pressVirtualKey(key) {
     if (!state.running || state.paused || state.ended || !state.mode) return;
     if (key === 'space') {
