@@ -19,6 +19,45 @@
   const deviceKeyboardBtn = $('deviceKeyboardBtn');
   const touchCapable = (navigator.maxTouchPoints || 0) > 0 || ('ontouchstart' in window) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
   let useDeviceKeyboard = true;
+  function keepTypingAreaVisible() {
+    if (!typingInput || document.activeElement !== typingInput) return;
+
+    requestAnimationFrame(() => {
+      // Position the textbox near the bottom of the visible screen,
+      // just above the native keyboard.
+      typingInput.scrollIntoView({
+        behavior: 'auto',
+        block: 'end',
+        inline: 'nearest'
+      });
+
+      // Correct for mobile browsers where the keyboard resizes
+      // the visual viewport without resizing the layout viewport.
+      requestAnimationFrame(() => {
+        const viewport = window.visualViewport;
+        if (!viewport) return;
+
+        const rect = typingInput.getBoundingClientRect();
+        const visibleBottom = viewport.offsetTop + viewport.height;
+        const margin = 12;
+
+        if (rect.bottom > visibleBottom - margin) {
+          window.scrollBy({
+            top: rect.bottom - visibleBottom + margin,
+            behavior: 'auto'
+          });
+        }
+      });
+    });
+  }
+
+  // Reposition when the phone keyboard opens or its visible area changes.
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', keepTypingAreaVisible);
+    window.visualViewport.addEventListener('scroll', keepTypingAreaVisible);
+  }
+
+  typingInput.addEventListener('focus', keepTypingAreaVisible);
   function updateInputMode() {
     const useTouchKeys = touchCapable && !useDeviceKeyboard;
     typingInput.readOnly = useTouchKeys;
@@ -110,7 +149,7 @@
   function beginRun() {
     initAudio(); hideOverlay(); state.running=true; state.paused=false; state.lastTime=performance.now(); state.spawnElapsed=0;
     typingInput.value=''; state.typed=''; typingInput.placeholder=state.mode==='letter'?'Type a letter…':state.mode==='word'?'Type a rocket word…':'Type the UFO phrase…';
-    typingInput.readOnly = false;typingInput.focus({ preventScroll: true }); state.raf=requestAnimationFrame(tick);
+    typingInput.readOnly = false;typingInput.focus({ preventScroll: true });keepTypingAreaVisible(); state.raf=requestAnimationFrame(tick);
     spawnThreat();
   }
   function pauseGame() {
@@ -359,7 +398,7 @@
     showView('results');
   }
 
-  $('typingInput').addEventListener('input',()=>handleTyping(typingInput.value));
+  $('typingInput').addEventListener('input',()=>{handleTyping(typingInput.value);keepTypingAreaVisible();});
   function pressVirtualKey(key) {
     if (!state.running || state.paused || state.ended || !state.mode) return;
     if (key === 'space') {
